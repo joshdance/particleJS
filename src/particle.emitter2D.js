@@ -231,11 +231,40 @@ ParticleJS.Emitter2D = function(w, h, options) {
 		return this;
 	};
 
+	this.feather = function(f) {
+
+		if (arguments.length === 0) return feather * 100;
+
+		if (f < 0) f = 0;
+		feather = f * 0.01;
+		return this;
+	};
+
+	this.opacity = function(o) {
+
+		if (arguments.length === 0) return opacity;
+
+		if (o < 0) o = 0;
+		opacity = o;
+		return this;
+	};
+
+
 	this.velocity = function(vel) {
 
-		if (arguments.length === 0) return velocity;
+		if (arguments.length === 0) return velocity * 100;
 
-		velocity = vel;
+		velocity = vel * 0.01;
+		return this;
+	};
+
+	this.size = function(sz) {
+
+		if (arguments.length === 0) return size;
+
+		if (sz < 1) sz= 1;
+
+		size = sz;
 		return this;
 	};
 
