@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+	<meta name="viewport" content="width=device-width; initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="(C) Epistemex">
+
+	<title>Proof-of-concept ParticleJS</title>
+
+	<style>
+		body {
+			background:#333;
+			color:#ccc;
+			font:14px sans-serif;
+			}
+
+	</style>
+</head>
+<body>
+
+	<div id="container">
+		<header>
+			<h1>Proof-of-concept ParticleJS</h1>
+		</header>
+
+		<div id="main">
+			<canvas id="canvas" width="512" height="256" style="border:1px solid #000;background:#111"></canvas>
+		</div>
+
+		<footer>
+
+		</footer>
+	</div> 	<!-- container -->
+
+<script src="../src/particle.core.js"></script>
+<script src="../src/particle.scene.js"></script>
+<script src="../src/particle.emitter2D.js"></script>
+<script src="../src/particle.particle.js"></script>
+<script src="../src/particle.physics.js"></script>
+<script src="../src/particle.renderer.canvas.js"></script>
+<script src="../src/particle.gradient.js"></script>
+
+<script>
+
+	var scene = new ParticleJS.Scene({
+			width: 800,
+			height: 400,
+			frameBound: false,
+			FPS: 30                 // only if frame bound
+		}),
+
+		renderer = new ParticleJS.CanvasRenderer(document.getElementById('canvas')),
+		gradient = new ParticleJS.Gradient(),
+
+		cnt = 0,
+		toggle = false;
+
+	gradient.addStop(0, '#ff7')
+			.addStop(0.1, '#ff5')
+			.addStop(0.11, '#ff7')
+			.addStop(0.25, '#f70')
+			.addStop(0.67, '#973')
+			.addStop(0.75, '#777')
+			.addStop(1, '#333');
+
+	scene.addEmitter({
+		velocity: 400,
+		randomVelocity: 60,
+		life: 3,
+		spread: 45,
+		spreadAngle: -70,
+		x: 50,
+		y: 100,
+		birthRate: 210,
+		size: 180,
+		randomSize: 60,
+		feather: 40,
+		gradient: gradient,
+		r: 150,
+		g: 190,
+		b: 250,
+		opacity: 0.015,
+		renderer: renderer,
+		preRender: true
+	});
+
+	scene.emitters[0].physics.gravityY = -0.025;
+	scene.emitters[0].physics.windX = 0.1;
+	scene.emitters[0].physics.windY = 0.7;
+
+	//scene.preRoll(250);
+
+	(function loop() {
+
+		//toggle = !toggle;       // run at 30 FPS
+
+		if (toggle) {
+			requestAnimationFrame(loop);
+			return;
+		}
+
+		scene.render();
+
+		scene.emitters[0].x = 100 + 70 * Math.cos(cnt*0.1);
+		scene.emitters[0].y = 400 + 50 * Math.sin(cnt*0.1);
+
+		cnt++;
+		if (cnt < 900) requestAnimationFrame(loop);
+	})();
+
+</script>
+</body>
+</html>
