@@ -49,7 +49,7 @@ to share canvas and chain/use several emitters for it, as well as setting up spr
 - Visual editor to create curves for "over-life" features, and:
 - Visual editor to setup an emitter and particles, and to generate code for it
 
-![snapshot from demo](http://i.imgur.com/9EZPn7R.jpg)
+![snapshot from demo](http://i.imgur.com/2XahkZR.jpg)
 
 Usage
 -----
