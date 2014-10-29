@@ -35,62 +35,62 @@
 			<div class="options">
 				<div>
 					<label for="rngRate">Birth-rate</label>
-					<input id="rngRate" type="range" min="10" max="2000" value="210">
-					<output id="outRate">210</output>
+					<input id="rngRate" type="range" min="10" max="2000" value="400">
+					<output id="outRate">400</output>
 				</div>
 
 				<div>
 					<label for="rngVel">Velocity</label>
-					<input id="rngVel" type="range" min="0" max="1000" value="400">
-					<output id="outVel">400</output>
+					<input id="rngVel" type="range" min="0" max="1000" value="300">
+					<output id="outVel">300</output>
 				</div>
 
 				<div>
 					<label for="rngSize">Size</label>
-					<input id="rngSize" type="range" min="1" max="200" value="200">
-					<output id="outSize">200</output>
+					<input id="rngSize" type="range" min="1" max="200" value="100">
+					<output id="outSize">100</output>
 				</div>
 
 				<div>
 					<label for="rngFeather">Feather</label>
-					<input id="rngFeather" type="range" min="0" max="50" value="40">
-					<output id="outFeather">40</output>
+					<input id="rngFeather" type="range" min="0" max="50" value="36">
+					<output id="outFeather">36</output>
 				</div>
 
 				<div>
 					<label for="rngOpacity">Opacity</label>
-					<input id="rngOpacity" type="range" min="0" max="1000" value="15">
-					<output id="outOpacity">0.015</output>
+					<input id="rngOpacity" type="range" min="0" max="1000" value="20">
+					<output id="outOpacity">0.02</output>
 				</div>
 
 				<div>
 					<label for="rngSpread">Spread</label>
-					<input id="rngSpread" type="range" min="0" max="359" value="45">
-					<output id="outSpread">45</output>
+					<input id="rngSpread" type="range" min="0" max="359" value="359">
+					<output id="outSpread">359</output>
 				</div>
 
 				<div>
 					<label for="rngSpreadA">Spread offset</label>
-					<input id="rngSpreadA" type="range" min="0" max="359" value="250">
-					<output id="outSpreadA">250</output>
+					<input id="rngSpreadA" type="range" min="0" max="359" value="0">
+					<output id="outSpreadA">0</output>
 				</div>
 
 				<div>
 					<label for="rngWindX">Wind X</label>
-					<input id="rngWindX" type="range" min="-50" max="50" value="10">
-					<output id="outWindX">0.1</output>
+					<input id="rngWindX" type="range" min="-50" max="50" value="20">
+					<output id="outWindX">0.2</output>
 				</div>
 
 				<div>
 					<label for="rngWindY">Wind Y</label>
-					<input id="rngWindY" type="range" min="-50" max="50" value="50">
-					<output id="outWindY">0.7</output>
+					<input id="rngWindY" type="range" min="-50" max="50" value="10">
+					<output id="outWindY">0.1</output>
 				</div>
 
 				<div>
 					<label for="rngGravY">Gravity Y</label>
-					<input id="rngGravY" type="range" min="-500" max="500" value="25">
-					<output id="outGravY">0.025</output>
+					<input id="rngGravY" type="range" min="-500" max="500" value="40">
+					<output id="outGravY">0.04</output>
 				</div>
 
 			</div>
@@ -141,29 +141,29 @@
 
 	// create emitter
 	scene.addEmitter({
-		velocity: 400,
+		birthRate: 400,
+		velocity: 300,
 		randomVelocity: 60,
 		life: 3,
-		spread: 45,
-		spreadAngle: 290,
+		spread: 360,
+		spreadAngle: 0,
 		x: 50,
 		y: 100,
-		birthRate: 210,
-		size: 200,
+		size: 100,
 		randomSize: 60,
-		feather: 40,
+		feather: 36,
 		gradient: gradient,
 		r: 150,
 		g: 190,
 		b: 250,
-		opacity: 0.015,
+		opacity: 0.2,
 		renderer: renderer,
 		preRender: true
 	});
 
-	scene.emitters[0].physics.gravityY = -0.025;
-	scene.emitters[0].physics.windX = 0.1;
-	scene.emitters[0].physics.windY = 0.7;
+	scene.emitters[0].physics.gravityY = -0.04;
+	scene.emitters[0].physics.windX = 0.2;
+	scene.emitters[0].physics.windY = 0.1;
 
 	//scene.preRoll(250);
 
