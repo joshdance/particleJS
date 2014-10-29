@@ -44,6 +44,7 @@
 
 <script>
 
+	// create scene
 	var scene = new ParticleJS.Scene({
 			width: 800,
 			height: 400,
@@ -51,20 +52,27 @@
 			FPS: 30                 // only if frame bound
 		}),
 
-		renderer = new ParticleJS.CanvasRenderer(document.getElementById('canvas')),
+		canvas = document.getElementById('canvas'),
+
+		// create renderer and optional gradient
+		renderer = new ParticleJS.CanvasRenderer(canvas),
 		gradient = new ParticleJS.Gradient(),
 
 		cnt = 0,
-		toggle = false;
+		toggle = false,
+		mx = 100,
+		my = 400;
 
-	gradient.addStop(0, '#ff7')
-			.addStop(0.1, '#ff5')
+	// define gradient
+	gradient.addStop(0   , '#ff7')
+			.addStop(0.1 , '#ff5')
 			.addStop(0.11, '#ff7')
 			.addStop(0.25, '#f70')
 			.addStop(0.67, '#973')
 			.addStop(0.75, '#777')
-			.addStop(1, '#333');
+			.addStop(1   , '#333');
 
+	// create emitter
 	scene.addEmitter({
 		velocity: 400,
 		randomVelocity: 60,
@@ -92,6 +100,12 @@
 
 	//scene.preRoll(250);
 
+	window.onmousemove = function(e) {
+		var r = canvas.getBoundingClientRect();
+		mx = e.clientX - r.left;
+		my = e.clientY - r.top;
+	};
+
 	(function loop() {
 
 		//toggle = !toggle;       // run at 30 FPS
@@ -103,11 +117,11 @@
 
 		scene.render();
 
-		scene.emitters[0].x = 100 + 70 * Math.cos(cnt*0.1);
-		scene.emitters[0].y = 400 + 50 * Math.sin(cnt*0.1);
+		scene.emitters[0].x = mx;
+		scene.emitters[0].y = my;
 
-		cnt++;
-		if (cnt < 900) requestAnimationFrame(loop);
+		//cnt++;
+		if (cnt < 2000) requestAnimationFrame(loop);
 	})();
 
 </script>
