@@ -82,13 +82,9 @@ ParticleJS.Emitter2D = function(w, h, options) {
 			phys = this.physics,
 			p;
 
-		//TODO check if this is necessary or if it need some other limitation
-		/*if (num > birthRate * ts) {
-			num = birthRate * ts;
-		}
-		else if (birthRate && num < 1) {
-			num = 1;
-		}*/
+		//TODO Use remainder which accumulates per update
+
+		//if (num < 1) num = 1;	//TODO if true, exit instead as we will use remainder
 
 		if (preRender && !preroll) renderer.preRender();
 
@@ -97,9 +93,9 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 			angle = spreadRad * Math.random() + spreadAngleRad;
 
-			vel = velocity - (rndVelocity * velocity * Math.random());
-			sz = size - (rndSize * size * Math.random());
-			o = opacity - (rndOpacity * opacity * Math.random());
+			vel = getValue(velocity, rndVelocity);
+			sz = getValue(size, rndSize);
+			o = getValue(opacity, rndOpacity);
 
 			vx = vel * Math.cos(angle);
 			vy = vel * Math.sin(angle);
@@ -174,6 +170,10 @@ ParticleJS.Emitter2D = function(w, h, options) {
 		if (postRender && !preroll) renderer.postRender();
 	};
 
+	function getValue(v, spread) {
+		return v - (spread * v * Math.random());
+	}
+
 	function getSizeOverLife(t) {
 
 		//t = Math.min(1, Math.max(0, t));
@@ -214,7 +214,7 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 	this.physics = new ParticleJS.Physics();
 
-	this.sizeOverLife = new Float32Array([0, 0.01, 0.25, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+	this.sizeOverLife = new Float32Array([0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
 	this.opacityOverLife = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.01]);
 	this.featherOverLife = new Float32Array([1]); //new Float32Array([0.01, 0.25, 0.5, 0.75, 0.8, 0.9]);
 
@@ -249,6 +249,13 @@ ParticleJS.Emitter2D = function(w, h, options) {
 		return this;
 	};
 
+	this.life = function(l) {
+
+		if (arguments.length === 0) return life * 0.001;
+
+		life = l * 1000;
+		return this;
+	};
 
 	this.velocity = function(vel) {
 
@@ -287,8 +294,5 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 		return this;
 	};
-
-
-
 
 };

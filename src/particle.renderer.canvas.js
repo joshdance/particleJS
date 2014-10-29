@@ -11,8 +11,11 @@ ParticleJS.CanvasRenderer = function(canvas) {
 		ccnt = 16,
 		cstep = 1 / ccnt,
 		sw,
+		swHalf,
 		sprite = document.createElement('canvas'),
+		spriteHalf = document.createElement('canvas'),
 		cs = sprite.getContext('2d'),
+		csHalf = spriteHalf.getContext('2d'),
 		lastCol = '';
 
 	this.init = function(width, height, options) {
@@ -33,12 +36,17 @@ ParticleJS.CanvasRenderer = function(canvas) {
 			szF = sz * 0.5 - featherR;
 
 		sw = sz;
+		swHalf = (sw * 0.5)|0;
 
 		sprite.width = sz * scnt;
 		sprite.height = hasGradient ? sz * ccnt : sz;
 
+		spriteHalf.width = sprite.width * 0.5;
+		spriteHalf.height = sprite.height * 0.5;
+
 		cs.save();
-		cs.shadowColor = "#fff"; //rgb(' + options.r + ',' + options.g + ',' + options.b + ')';
+
+		cs.shadowColor = hasGradient ? "#fff" : 'rgb(' + options.r + ',' + options.g + ',' + options.b + ')';
 
 		for(; i < scnt; i++) {
 
@@ -76,17 +84,14 @@ ParticleJS.CanvasRenderer = function(canvas) {
 			}
 
 		}
-		else {
-			cs.globalCompositeOperation = 'source-in';
-			cs.fillStyle = 'rgb(' + options.r + ',' + options.g + ',' + options.b + ')';
-			cs.fillRect(0, 0, sw * scnt, sw);
-		}
+
+		csHalf.drawImage(sprite, 0, 0, sprite.width, sprite.height,
+								 0, 0, spriteHalf.width, spriteHalf.height);
 
 		ctx.mozImageSmoothingEnabled =
 			ctx.webkitImageSmoothingEnabled =
 				ctx.imageSmoothingEnabled = false;
 
-		//document.body.appendChild(sprite);
 	};
 
 	this.preRender = function() {
@@ -102,8 +107,18 @@ ParticleJS.CanvasRenderer = function(canvas) {
 			ci = ((ccnt * p.lifeIndex + 0.5)|0),
 			sy = ci * sw;
 
+		if (sy > sprite.height) sy = 0;
+
 		ctx.globalAlpha = p.opacity;
-		ctx.drawImage(sprite, sx, sy, sw, sw, p.x - p.sizeR, p.y - p.sizeR, p.size, p.size);
+
+		if (p.size > swHalf) {
+			ctx.drawImage(sprite, sx, sy, sw, sw, p.x - p.sizeR, p.y - p.sizeR, p.size, p.size);
+		}
+		else {
+			ctx.drawImage(spriteHalf, sx>>1, sy>>1, swHalf, swHalf,
+				p.x - p.sizeR, p.y - p.sizeR, p.size, p.size);
+		}
+
 	};
 
 	this.postRender = function() {

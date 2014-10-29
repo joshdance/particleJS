@@ -34,8 +34,14 @@
 
 			<div class="options">
 				<div>
+					<label for="rngLife">Life (s)</label>
+					<input id="rngLife" type="range" min="5" max="200" value="30">
+					<output id="outLife">3</output>
+				</div>
+
+				<div>
 					<label for="rngRate">Birth-rate</label>
-					<input id="rngRate" type="range" min="10" max="2000" value="400">
+					<input id="rngRate" type="range" min="1" max="2000" value="400">
 					<output id="outRate">400</output>
 				</div>
 
@@ -89,8 +95,14 @@
 
 				<div>
 					<label for="rngGravY">Gravity Y</label>
-					<input id="rngGravY" type="range" min="-500" max="500" value="40">
+					<input id="rngGravY" type="range" min="-50" max="50" value="4">
 					<output id="outGravY">0.04</output>
+				</div>
+
+				<div>
+					<hr>
+					<input id="chkShoot" type="checkbox">
+					<label for="chkShoot">Click to spray</label>
 				</div>
 
 			</div>
@@ -114,7 +126,7 @@
 	// create scene
 	var scene = new ParticleJS.Scene({
 			width: 800,
-			height: 400,
+			height: 560,
 			frameBound: false,
 			FPS: 30                 // only if frame bound
 		}),
@@ -128,12 +140,14 @@
 		cnt = 0,
 		toggle = false,
 		mx = 100,
-		my = 400;
+		my = 400,
+		shoot = false,
+		brate = 400;
 
 	// define gradient
-	gradient.addStop(0   , '#ff7')
-			.addStop(0.1 , '#ff5')
-			.addStop(0.11, '#ff7')
+	gradient.addStop(0   , '#ffc')
+			.addStop(0.07 , '#ff5')
+			.addStop(0.09, '#ff7')
 			.addStop(0.25, '#f70')
 			.addStop(0.67, '#973')
 			.addStop(0.75, '#777')
@@ -141,41 +155,47 @@
 
 	// create emitter
 	scene.addEmitter({
-		birthRate: 400,
-		velocity: 300,
-		randomVelocity: 60,
-		life: 3,
-		spread: 360,
-		spreadAngle: 0,
-		x: 50,
-		y: 100,
-		size: 100,
-		randomSize: 60,
-		feather: 36,
-		gradient: gradient,
-		r: 150,
+		birthRate: brate,       // particles per frame
+		velocity: 300,          // speed each particle is thrown at its direction
+		randomVelocity: 60,     // variation in % between full and full - %
+		life: 3,                // life in seconds
+		spread: 360,            // angle of spread
+		spreadAngle: 0,         // if spread is not 360, angle offset to spread from
+		x: 400,                 // emitter center
+		y: 200,
+		size: 100,              // global (max) diameter in pixels of each particle
+		randomSize: 60,         // size variation in %
+		feather: 36,            // feather in number of pixels
+		gradient: gradient,     // optional gradient (overrides color below)
+		r: 150,                 // base color
 		g: 190,
 		b: 250,
-		opacity: 0.2,
-		renderer: renderer,
-		preRender: true
+		opacity: 0.2,           // global opacity, overriden by variation and ramp (opacity over life)
+		renderer: renderer,     // use this renderer (mandatory)
+		preRender: true         // call pre-render (clears canvas)
 	});
 
 	scene.emitters[0].physics.gravityY = -0.04;
 	scene.emitters[0].physics.windX = 0.2;
 	scene.emitters[0].physics.windY = 0.1;
 
-	//scene.preRoll(250);
-
+	// move emitter to mouse position
 	window.onmousemove = function(e) {
 		var r = canvas.getBoundingClientRect();
 		mx = e.clientX - r.left;
 		my = e.clientY - r.top;
 	};
 
+	// options
+	document.getElementById('rngLife').addEventListener('change', function() {
+		var v = this.value * 0.1;
+		scene.emitters[0].life(v);
+		document.getElementById('outLife').innerHTML = v.toFixed(1);
+	}, false);
+
 	document.getElementById('rngRate').addEventListener('change', function() {
-		var v = this.value;
-		scene.emitters[0].birthRate(v);
+		brate = this.value;
+		if (!shoot) scene.emitters[0].birthRate(brate);
 		document.getElementById('outRate').innerHTML = v;
 	}, false);
 
@@ -228,19 +248,47 @@
 	}, false);
 
 	document.getElementById('rngGravY').addEventListener('change', function() {
-		var v = this.value * 0.001;
+		var v = this.value * 0.01;
 		scene.emitters[0].physics.gravityY = v;
 		document.getElementById('outGravY').innerHTML = v.toFixed(3);
 	}, false);
 
+
+	// allow "shooting" (mouse down = birth rate, up = none)
+	document.getElementById('chkShoot').addEventListener('change', function() {
+
+		shoot = !!this.checked;
+
+		if (shoot) {
+			scene.emitters[0].birthRate(0);
+
+		}
+		else {
+			scene.emitters[0].birthRate(brate);
+
+		}
+
+
+	}, false);
+
+	// for shooting
+	canvas.addEventListener('mousedown', function() {
+		scene.emitters[0].birthRate(brate);
+	}, false);
+
+	canvas.addEventListener('mouseup', function() {
+		if (shoot) scene.emitters[0].birthRate(0);
+	}, false);
+
+	// main loop
 	(function loop() {
 
-		//toggle = !toggle;       // run at 30 FPS
+		/*toggle = !toggle;       // run at 30 FPS
 
 		if (toggle) {
 			requestAnimationFrame(loop);
 			return;
-		}
+		}*/
 
 		scene.render();
 
@@ -248,7 +296,8 @@
 		scene.emitters[0].y = my;
 
 		//cnt++;
-		if (cnt < 2000) requestAnimationFrame(loop);
+		//if (cnt < 2000)
+			requestAnimationFrame(loop);
 	})();
 
 </script>

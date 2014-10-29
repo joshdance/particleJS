@@ -30,7 +30,7 @@ ParticleJS.Particle = function() {
 
 	this.born			= 0;				// timestamp
 	this.life			= 0;				// in milliseconds
-	this.lifeIndex		= 0;				// for size/opacity over time
+	this.lifeIndex		= 0;				// for size/opacity over time, 0-1
 
 	this.isActive		= true;
 };

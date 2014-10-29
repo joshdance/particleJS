@@ -1,0 +1,12 @@
+Change log for ParticleJS
+-------------------------
+
+0.2 ALPHA
+
+CHG: Speed improvements in renderer
+FIX: Various minor bugs in ranges
+ADD: Common function for calculating random spread
+
+0.1 ALPHA
+
+Initial release
