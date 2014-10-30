@@ -1,12 +1,16 @@
 Change log for ParticleJS
 -------------------------
 
-0.2 ALPHA
+0.1.1 ALPHA
 
-CHG: Speed improvements in renderer
-FIX: Various minor bugs in ranges
+CHG: scene.addEmitter() returns a reference for the created emitter
+CHG: Speed improvements in renderer using scaled cache
+ADD: Support for variable feather size (random based on %)
 ADD: Common function for calculating random spread
+ADD: Improved "GC" of empty arrays
+ADD: method on emitter to set render
+FIX: Various minor bugs in ranges
 
-0.1 ALPHA
+0.1.0 ALPHA
 
 Initial release

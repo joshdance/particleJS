@@ -2,6 +2,8 @@
 	2D Emitter class for ParticleJS
  */
 
+"use strict";
+
 ParticleJS.Emitter2D = function(w, h, options) {
 
 	options = options || {};
@@ -19,6 +21,7 @@ ParticleJS.Emitter2D = function(w, h, options) {
 		rndVelocity		= (typeof options.randomVelocity === 'number' ? options.randomVelocity : 0) * 0.01,
 		rndOpacity		= (typeof options.randomOpacity === 'number' ? options.randomOpacity : 0) * 0.01,
 		rndSize			= (typeof options.randomSize === 'number' ? options.randomSize : 0) * 0.01,
+		rndFeather		= (typeof options.randomFeather === 'number' ? options.randomFeather : 0) * 0.01,
 		spread			= typeof options.spread === 'number' ? options.spread : 360,
 		spreadAngle		= typeof options.spreadAngle === 'number' ? options.spreadAngle : 0,
 		spreadRad		= spread * deg2rad,
@@ -28,13 +31,15 @@ ParticleJS.Emitter2D = function(w, h, options) {
 		blue			= typeof options.b === 'number' ? options.b : 255,
 		gradient		= options.gradient ? options.gradient : null,
 
-		renderer		= options.renderer || null,
+		renderer,
 		preRender		= options.preRender,
 		postRender		= options.postRender,
 
 		count			= 0,
 
-		particles		= []
+		particles		= [],
+		cleanStamp		= 0,
+		cleanInt		= 1000
 		;
 
 
@@ -45,31 +50,14 @@ ParticleJS.Emitter2D = function(w, h, options) {
 	/*
 		Create particles
 	*/
-	if (renderer) renderer.init(w, h, {
-		size: size,
-		r: red,
-		g: green,
-		b: blue,
-		feather: feather,
-		opacity: opacity,
-		gradient: gradient
-	});
 
-	// first call to setup - may be called several times if size etc. changes
-	if (renderer) renderer.setup(w, h, {
-		size: size,
-		r: red,
-		g: green,
-		b: blue,
-		feather: feather,
-		opacity: opacity,
-		gradient: gradient
-	});
+	this.render = function(ts, diff, time) {
 
-	this.render = function(ts, diff, time, preroll) {
+		//TODO move prerolling out of here and use physics directly
 
 		var num = ((birthRate * ts) / diff + 0.5)|0,
 			parts = [],
+			part,
 			angle = 0,
 			vel = 0,
 			vx = 0,
@@ -78,6 +66,7 @@ ParticleJS.Emitter2D = function(w, h, options) {
 			i = 0,
 			t = 0,
 			o = 0,
+			f = 0,
 			population = false,
 			phys = this.physics,
 			p;
@@ -86,16 +75,17 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 		//if (num < 1) num = 1;	//TODO if true, exit instead as we will use remainder
 
-		if (preRender && !preroll) renderer.preRender();
+		if (preRender) renderer.preRender();
 
 		// produce number of particles
 		for(; i < num; i++) {
 
 			angle = spreadRad * Math.random() + spreadAngleRad;
 
-			vel = getValue(velocity, rndVelocity);
-			sz = getValue(size, rndSize);
-			o = getValue(opacity, rndOpacity);
+			vel = getSpreadValue(velocity, rndVelocity);
+			sz = getSpreadValue(size, rndSize);
+			o = getSpreadValue(opacity, rndOpacity);
+			f = getSpreadValue(feather, rndFeather);
 
 			vx = vel * Math.cos(angle);
 			vy = vel * Math.sin(angle);
@@ -116,11 +106,12 @@ ParticleJS.Emitter2D = function(w, h, options) {
 			p.r = red;
 			p.g = green;
 			p.b = blue;
-			p.opacity = o;
-			p.opacityO = o;
 
-			p.feather = feather;
+			p.opacityO = o;
+			p.opacity = o * getOpacityOverLife(0);
+
 			p.featherO = feather;
+			p.feather = feather * getFeatherOverLife(0);
 
 			parts.push(p);
 		}
@@ -129,6 +120,8 @@ ParticleJS.Emitter2D = function(w, h, options) {
 		particles.push(parts);
 
 		count = 0;
+
+		//TODO: encapsulate following loop into a function
 
 		// iterate to update, apply physics, render and clean up
 		for(i = 0; part = particles[i++];) {
@@ -155,7 +148,7 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 					// calc. velocity vector based on physics and local properties of particle
 					phys.apply(p, ts);
-					if (!preroll) renderer.renderParticle(p);
+					renderer.renderParticle(p);
 
 				}	// active
 
@@ -167,10 +160,18 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 		}	// i
 
-		if (postRender && !preroll) renderer.postRender();
+		if (postRender) renderer.postRender();
+
+		if (time - cleanInt > cleanStamp) {
+			cleanStamp = time;
+			for(i = particles.length; p = particles[--i];) {
+				//TODO consider building a new array instead
+				if (!p.length) particles.slice(i, 1);
+			}
+		}
 	};
 
-	function getValue(v, spread) {
+	function getSpreadValue(v, spread) {
 		return v - (spread * v * Math.random());
 	}
 
@@ -214,13 +215,41 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 	this.physics = new ParticleJS.Physics();
 
-	this.sizeOverLife = new Float32Array([0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
-	this.opacityOverLife = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.01]);
-	this.featherOverLife = new Float32Array([1]); //new Float32Array([0.01, 0.25, 0.5, 0.75, 0.8, 0.9]);
+	this.sizeOverLife = new Float32Array([1]);
+	this.opacityOverLife = new Float32Array([1]);
+	this.featherOverLife = new Float32Array([1]);
 
 	/*
-		Methods
+	 Methods
 	 */
+
+	this.setRenderer = function(r) {
+
+		renderer = r;
+
+		if (renderer) renderer.init(w, h, {
+			size: size,
+			r: red,
+			g: green,
+			b: blue,
+			feather: feather,
+			opacity: opacity,
+			gradient: gradient
+		});
+
+		// first call to setup - may be called several times if size etc. changes
+		if (renderer) renderer.setup(w, h, {
+			size: size,
+			r: red,
+			g: green,
+			b: blue,
+			feather: feather,
+			opacity: opacity,
+			gradient: gradient
+		});
+
+		return this;
+	};
 
 	this.birthRate = function(brate) {
 
@@ -295,4 +324,8 @@ ParticleJS.Emitter2D = function(w, h, options) {
 		return this;
 	};
 
+	/*
+		Set renderer if defined in options
+	 */
+	if (options.renderer) this.setRenderer(options.renderer);
 };

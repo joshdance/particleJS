@@ -136,6 +136,7 @@
 		// create renderer and optional gradient
 		renderer = new ParticleJS.CanvasRenderer(canvas),
 		gradient = new ParticleJS.Gradient(),
+		emitter,
 
 		cnt = 0,
 		toggle = false,
@@ -146,38 +147,46 @@
 
 	// define gradient
 	gradient.addStop(0   , '#ffc')
-			.addStop(0.07 , '#ff5')
+			.addStop(0.07, '#ff5')
 			.addStop(0.09, '#ff7')
-			.addStop(0.25, '#f70')
-			.addStop(0.67, '#973')
-			.addStop(0.75, '#777')
+			.addStop(0.20, '#f70')
+			.addStop(0.40, '#973')
+			.addStop(0.60, '#777')
 			.addStop(1   , '#333');
 
 	// create emitter
-	scene.addEmitter({
-		birthRate: brate,       // particles per frame
-		velocity: 300,          // speed each particle is thrown at its direction
-		randomVelocity: 60,     // variation in % between full and full - %
-		life: 3,                // life in seconds
-		spread: 360,            // angle of spread
-		spreadAngle: 0,         // if spread is not 360, angle offset to spread from
-		x: 400,                 // emitter center
-		y: 200,
-		size: 100,              // global (max) diameter in pixels of each particle
-		randomSize: 60,         // size variation in %
-		feather: 36,            // feather in number of pixels
-		gradient: gradient,     // optional gradient (overrides color below)
-		r: 150,                 // base color
-		g: 190,
-		b: 250,
-		opacity: 0.2,           // global opacity, overriden by variation and ramp (opacity over life)
-		renderer: renderer,     // use this renderer (mandatory)
-		preRender: true         // call pre-render (clears canvas)
-	});
+	emitter = scene.addEmitter({
+			birthRate: brate,       // particles per frame
+			velocity: 300,          // speed each particle is thrown at its direction
+			randomVelocity: 60,     // variation in % between full and full - %
+			life: 3,                // life in seconds
+			spread: 360,            // angle of spread
+			spreadAngle: 0,         // if spread is not 360, angle offset to spread from
+			x: 400,                 // emitter center
+			y: 200,
+			size: 100,              // global (max) diameter in pixels of each particle
+			randomSize: 60,         // size variation in %
+			feather: 36,            // feather in number of pixels
+			randomFeather: 0,
+			gradient: gradient,     // optional gradient (overrides color below)
+			r: 150,                 // base color
+			g: 190,
+			b: 250,
+			opacity: 0.2,           // global opacity, overriden by variation and ramp (opacity over life)
+			randomOpacity: 0,
+			renderer: renderer,     // use this renderer (mandatory)
+			preRender: true         // call pre-render (clears canvas)
+		});
 
-	scene.emitters[0].physics.gravityY = -0.04;
-	scene.emitters[0].physics.windX = 0.2;
-	scene.emitters[0].physics.windY = 0.1;
+	// physics
+	emitter.physics.gravityY = -0.04;
+	emitter.physics.windX = 0.2;
+	emitter.physics.windY = 0.1;
+
+	// over-life arrays
+	emitter.sizeOverLife = new Float32Array([0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+	emitter.opacityOverLife = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.01]);
+	emitter.featherOverLife = new Float32Array([1]); //new Float32Array([0.01, 0.25, 0.5, 0.75, 0.8, 0.9]);
 
 	// move emitter to mouse position
 	window.onmousemove = function(e) {
@@ -276,7 +285,7 @@
 		scene.emitters[0].birthRate(brate);
 	}, false);
 
-	canvas.addEventListener('mouseup', function() {
+	window.addEventListener('mouseup', function() {
 		if (shoot) scene.emitters[0].birthRate(0);
 	}, false);
 

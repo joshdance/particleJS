@@ -42,24 +42,24 @@ ParticleJS.Scene = function(options) {
 					   : new ParticleJS.Emitter2D(width, height, options);
 
 		this.emitters.push(e);
-		return this;
+		return e;
 	};
 
+	//TODO: disabled for now
 	this.preRoll = function(frames) {
-		//TODO affect life of particle, subtract frames * frame from diff ?
+		//TODO use physics directly and as frame bound (ts=1), lifeUpdate changes..
 		var time = performance.now();
 		for(var pre = 0; pre < frames; pre++) {
 			for(var i = 0, e; e = this.emitters[i++];) {
-				e.render(1, 16.667, time, true);
+				//e.render(1, 16.667, time, true);
 			}
-
 		}
 		return this;
 	};
 
 	this.render = function() {
 
-		//TODO only if time bound
+		//TODO only if time bound: else ts=1. plug functions here instead, for perf.
 		var time = performance.now(),
 			diff = time - lastTime,
 			ts = frameBound ? 60 / FPS : diff / 16.6667;
