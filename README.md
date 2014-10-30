@@ -22,7 +22,7 @@ The engine is for real-time use, but is work in progress.
 - Spread angle offset
 - Time or frame bound (latter intended for rendering frames)
 - Plugin based renderer (incl. for 2D canvas)
-- Random variations and amount of it for velocity, size and opacity at birth
+- Random variations and amount of it for velocity, size, feather and opacity at birth
 - Physics engine supporting gravity and wind.
 - Engine support pre, post and update calls per emitter for renderer (this allow you
 to share canvas and chain/use several emitters for it, as well as setting up sprite caches).
@@ -31,15 +31,12 @@ to share canvas and chain/use several emitters for it, as well as setting up spr
 **In progress:**
 
 - Z-axis support (2.5D)
-- Variation for feather at birth
 - Additional velocity parameters
 - Improve air resistance of physics engine
 - Additional physic parameters such as magnet (attractor)
 - Particle shape plugins (can be part of the renderer already though)
 - Turbulence for wind (this should perhaps have been placed in below section...)
-- Improve clean-up by also removing empty arrays on a "n-th" basis.
 - A High-Quality mode if user wants to render frames in a no real-time scenario
-- Add sliders etc. for demo (current demo runs for a limited time just as proof-of-concept)
 
 **MAYBE... and most likely only for a web-gl renderer:**
 
