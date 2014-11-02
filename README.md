@@ -27,13 +27,13 @@ The engine is for real-time use, but is work in progress.
 - Engine support pre, post and update calls per emitter for renderer (this allow you
 to share canvas and chain/use several emitters for it, as well as setting up sprite caches).
 - Automatic clean-up of dead particles
+- Additional physic parameters such as magnet (attractor or repeller using negative values)
 
 **In progress:**
 
 - Z-axis support (2.5D)
 - Additional velocity parameters
 - Improve air resistance of physics engine
-- Additional physic parameters such as magnet (attractor)
 - Particle shape plugins (can be part of the renderer already though)
 - Turbulence for wind (this should perhaps have been placed in below section...)
 - A High-Quality mode if user wants to render frames in a no real-time scenario
@@ -62,8 +62,7 @@ Please see included demo and play around with the parameters in the source.
 Issues
 ------
 
-There are known issues with f.ex. preRolling, stopping a loop (use birth rate of 0 instead)
-and some others. As the engine is in alpha there is no need at this point to
+There are known issues. As the engine is in alpha there is no need at this point to
 report issues as things change fast and we may add/remove features and so forth for
 the next version.
 
