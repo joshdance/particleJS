@@ -4,11 +4,13 @@
 
 "use strict";
 
-ParticleJS.Emitter2D = function(w, h, options) {
+ParticleJS.Emitter2D = function(options) {
 
 	options = options || {};
 
 	var me				= this,
+		w,
+		h,
 		deg2rad			= 0.017453292519943295,
 		pID				= 0,
 
@@ -45,7 +47,23 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 	// Check gradient
 
-	if (gradient) gradient.generate();
+	if (gradient) {
+		if (Array.isArray(gradient)) {
+			gradient = {
+				cache: gradient
+			};
+		}
+		else {
+			gradient.generate();
+		}
+	}
+
+	this.init = function(width, height) {
+		w = width;
+		h = height;
+		if (options.renderer) me.setRenderer(options.renderer);
+	};
+
 
 	/*
 		Create particles
@@ -53,23 +71,8 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 	this.render = function(ts, diff, time) {
 
-		//TODO move prerolling out of here and use physics directly
-
 		var num = ((birthRate * ts) / diff + 0.5)|0,
-			parts = [],
-			part,
-			angle = 0,
-			vel = 0,
-			vx = 0,
-			vy = 0,
-			sz = 0,
-			i = 0,
-			t = 0,
-			o = 0,
-			f = 0,
-			population = false,
-			phys = this.physics,
-			p;
+			phys = this.physics;
 
 		//TODO Use remainder which accumulates per update
 
@@ -77,134 +80,166 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 		if (preRender) renderer.preRender();
 
-		// produce number of particles
-		for(; i < num; i++) {
-
-			angle = spreadRad * Math.random() + spreadAngleRad;
-
-			vel = getSpreadValue(velocity, rndVelocity);
-			sz = getSpreadValue(size, rndSize);
-			o = getSpreadValue(opacity, rndOpacity);
-			f = getSpreadValue(feather, rndFeather);
-
-			vx = vel * Math.cos(angle);
-			vy = vel * Math.sin(angle);
-
-			p = new ParticleJS.Particle();
-
-			p.id = ++pID;
-			p.x = this.x;
-			p.y = this.y;
-			p.vx = vx;
-			p.vy = vy;
-			p.sizeO = sz;
-			p.size = p.sizeO * getSizeOverLife(0);
-			p.sizeR = p.sizeO * .5;
-			p.life = life;
-			p.born = time;
-
-			p.r = red;
-			p.g = green;
-			p.b = blue;
-
-			p.opacityO = o;
-			p.opacity = o * getOpacityOverLife(0);
-
-			p.featherO = feather;
-			p.feather = feather * getFeatherOverLife(0);
-
-			parts.push(p);
-		}
-
-		// add to global array
-		particles.push(parts);
-
 		count = 0;
 
-		//TODO: encapsulate following loop into a function
-
-		// iterate to update, apply physics, render and clean up
-		for(i = 0; part = particles[i++];) {
-
-			population = false;
-
-			for(t = 0; p = part[t++];) {
-
-				if (p.isActive) {
-
-					count++;
-
-					p.updateLife(time);
-
-					var pi = p.lifeIndex;
-
-					p.size = p.sizeO * getSizeOverLife(pi);
-					p.sizeR = p.size * 0.5;
-
-					p.opacity = p.opacityO * getOpacityOverLife(pi);
-					p.feather = p.featherO * getFeatherOverLife(pi);
-
-					population = true;
-
-					// calc. velocity vector based on physics and local properties of particle
-					phys.apply(p, ts);
-					renderer.renderParticle(p);
-
-				}	// active
-
-			}	// t
-
-			if (!population) {
-				particles[i-1] = [];
-			}
-
-		}	// i
+		if (num) generateParticles(particles, num);
+		pushParticles(particles);
 
 		if (postRender) renderer.postRender();
 
+		// clean-up empty arrays. todo: find ideal time int.
 		if (time - cleanInt > cleanStamp) {
 			cleanStamp = time;
-			for(i = particles.length; p = particles[--i];) {
-				//TODO consider building a new array instead
-				if (!p.length) particles.slice(i, 1);
-			}
+			// rebuild array wins over slice away: http://jsperf.com/slice-away-versus-rebuilding-array
+			var tParticles = [];
+			for(var i = 0, p; p = particles[i++];) if (p.length) tParticles.push(p);
+			particles = tParticles;
+			tParticles = null;
 		}
+
+		function generateParticles(particles, num) {
+
+			var	parts = [],
+				angle = 0,
+				vel = 0,
+				vx = 0,
+				vy = 0,
+				sz = 0,
+				o = 0,
+				f = 0,
+				em = me,
+				ool = getOpacityOverLife(0),
+				fol = getFeatherOverLife(0),
+				sol = getSizeOverLife(0);
+
+				// produce number of particles
+			while(num--) {
+
+				angle = spreadRad * Math.random() + spreadAngleRad;
+
+				vel = getSpreadValue(velocity, rndVelocity);
+				sz = getSpreadValue(size, rndSize);
+				o = getSpreadValue(opacity, rndOpacity);
+				f = getSpreadValue(feather, rndFeather);
+
+				vx = vel * Math.cos(angle);
+				vy = vel * Math.sin(angle);
+
+				var p = new ParticleJS.Particle();
+
+				p.id = ++pID;
+				p.x = em.x;
+				p.y = em.y;
+				p.vx = vx;
+				p.vy = vy;
+				p.angle = angle;
+				p.sizeO = sz;
+				p.size = p.sizeO * sol;
+				p.sizeR = p.sizeO * .5;
+				p.life = life;
+				p.born = time;
+
+				p.r = red;
+				p.g = green;
+				p.b = blue;
+
+				p.opacityO = o;
+				p.opacity = o * ool;
+
+				p.featherO = feather;
+				p.feather = feather * fol;
+
+				parts.push(p);
+			}
+
+			// add to global array
+			particles.push(parts);
+		}
+
+		function pushParticles(particles) {
+
+			var i = -1,
+				len = particles.length,
+				part,
+				population;
+
+			// iterate to update, apply physics, render and clean up
+			while(++i < len) {
+
+				part = particles[i];
+
+				population = false;
+
+				part.forEach(function(p) {
+
+					if (p.isActive) {
+
+						//count++;
+
+						p.updateLife(time);
+
+						if (p.isActive) {
+							var pi = p.lifeIndex;
+							p.opacity = p.opacityO * getOpacityOverLife(pi);
+							p.feather = p.featherO * getFeatherOverLife(pi);
+							p.size = p.sizeO * getSizeOverLife(pi);
+							p.sizeR = p.size * 0.5;
+
+							population = true;
+
+							// calc. velocity vector based on physics and local properties of particle
+							phys.apply(p, ts);
+
+							renderer.renderParticle(p);
+						}
+
+					}	// active
+
+				});	// forEach
+
+				if (!population) particles[i] = [];
+
+			}	// i
+
+		}
+
+		function getSpreadValue(v, spread) {
+			return v - (spread * v * Math.random());
+		}
+
+		function getSizeOverLife(t) {
+
+			//t = Math.min(1, Math.max(0, t));
+
+			var a = me.sizeOverLife,
+				l = a.length,
+				i = (l * t + 0.5)|0;
+
+			return a[i] || 0;
+		}
+
+		function getOpacityOverLife(t) {
+
+			var a = me.opacityOverLife,
+				l = a.length,
+				i = (l * t + 0.5)|0;
+
+			//if (i < 0) i = 0;
+
+			return a[i] || 1;
+		}
+
+		function getFeatherOverLife(t) {
+
+			var a = me.featherOverLife,
+				l = a.length,
+				i = (l * t + 0.5)|0;
+
+			return a[i] || 1;
+		}
+
 	};
 
-	function getSpreadValue(v, spread) {
-		return v - (spread * v * Math.random());
-	}
-
-	function getSizeOverLife(t) {
-
-		//t = Math.min(1, Math.max(0, t));
-
-		var a = me.sizeOverLife,
-			l = a.length,
-			i = (l * t + 0.5)|0;
-
-		return a[i] || 0;
-	}
-
-	function getOpacityOverLife(t) {
-
-		var a = me.opacityOverLife,
-			l = a.length,
-			i = (l * t + 0.5)|0;
-
-		if (i < 0) i = 0;
-
-		return a[i] || 1;
-	}
-
-	function getFeatherOverLife(t) {
-
-		var a = me.featherOverLife,
-			l = a.length,
-			i = (l * t + 0.5)|0;
-
-		return a[i] || 1;
-	}
 
 	/*
 	 Settings
@@ -253,61 +288,64 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 	this.birthRate = function(brate) {
 
-		if (arguments.length === 0) return birthRate;
+		if (!arguments.length) return birthRate;
 
 		if (brate < 0) brate = 0;
 		birthRate = brate;
+
 		return this;
 	};
 
 	this.feather = function(f) {
 
-		if (arguments.length === 0) return feather * 100;
+		if (!arguments.length) return feather * 100;
 
 		if (f < 0) f = 0;
 		feather = f * 0.01;
+
 		return this;
 	};
 
 	this.opacity = function(o) {
 
-		if (arguments.length === 0) return opacity;
+		if (!arguments.length) return opacity;
 
 		if (o < 0) o = 0;
 		opacity = o;
+
 		return this;
 	};
 
 	this.life = function(l) {
 
-		if (arguments.length === 0) return life * 0.001;
-
+		if (!arguments.length) return life * 0.001;
 		life = l * 1000;
+
 		return this;
 	};
 
 	this.velocity = function(vel) {
 
-		if (arguments.length === 0) return velocity * 100;
-
+		if (!arguments.length) return velocity * 100;
 		velocity = vel * 0.01;
+
 		return this;
 	};
 
 	this.size = function(sz) {
 
-		if (arguments.length === 0) return size;
-
+		if (!arguments.length) return size;
 		if (sz < 1) sz= 1;
-
 		size = sz;
+
+		//todo update renderer
+
 		return this;
 	};
 
 	this.spread = function(angle) {
 
-		if (arguments.length === 0) return angle;
-
+		if (!arguments.length) return angle;
 		spread = angle;
 		spreadRad = angle * deg2rad;
 
@@ -316,16 +354,33 @@ ParticleJS.Emitter2D = function(w, h, options) {
 
 	this.spreadAngle = function(angle) {
 
-		if (arguments.length === 0) return spreadAngle;
-
+		if (!arguments.length) return spreadAngle;
 		spreadAngle = angle;
 		spreadAngleRad = angle * deg2rad;
 
 		return this;
 	};
 
-	/*
-		Set renderer if defined in options
-	 */
-	if (options.renderer) this.setRenderer(options.renderer);
+	this.translate = function(dx, dy, dz) {
+
+		var i = 0,
+			part;
+
+		// iterate to update, apply physics, render and clean up
+		for(; part = particles[i++];) {
+			for(var t = 0, p; p = part[t++];) {
+				if (p.isActive) {
+					p.x += dx;
+					p.y += dy;
+				}
+			} // t
+
+		}	// i
+
+		return this;
+	};
+
+	this.rotate;
+	this.scale;
+
 };

@@ -36,13 +36,10 @@ ParticleJS.Scene = function(options) {
 
 	};
 
-	this.addEmitter = function(options) {
-
-		var e = mode3D ? new ParticleJS.Emitter3D(width, height, options)
-					   : new ParticleJS.Emitter2D(width, height, options);
-
-		this.emitters.push(e);
-		return e;
+	this.addEmitter = function(emitter) {
+		emitter.init(width, height);
+		this.emitters.push(emitter);
+		return this;
 	};
 
 	//TODO: disabled for now

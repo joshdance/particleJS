@@ -20,13 +20,24 @@
 			float:right;
 			width:500px;
 			}
+
+		label {
+			display:inline-block;
+			width:100px;
+			}
+		output {
+			text-align: right;
+			display:inline-block;
+			width:50px;
+			}
 	</style>
+
 </head>
 <body>
 
 	<div id="container">
 		<header>
-			<h1>Proof-of-concept ParticleJS</h1>
+			<h1>ParticleJS testbench</h1>
 		</header>
 
 		<div id="main">
@@ -89,20 +100,37 @@
 
 				<div>
 					<label for="rngWindY">Wind Y</label>
-					<input id="rngWindY" type="range" min="-50" max="50" value="10">
+					<input id="rngWindY" type="range" min="-30" max="30" value="10">
 					<output id="outWindY">0.1</output>
 				</div>
 
 				<div>
 					<label for="rngGravY">Gravity Y</label>
-					<input id="rngGravY" type="range" min="-50" max="50" value="4">
+					<input id="rngGravY" type="range" min="-20" max="20" value="4">
 					<output id="outGravY">0.04</output>
+				</div>
+
+				<div>
+					<label for="rngMagnet">Magnet force</label>
+					<input id="rngMagnet" type="range" min="-20" max="20" value="0">
+					<output id="outMagnet">0</output>
+				</div>
+
+				<div>
+					<label for="rngMagnetR">Magnet radius</label>
+					<input id="rngMagnetR" type="range" min="1" max="400" value="100">
+					<output id="outMagnetR">100</output>
 				</div>
 
 				<div>
 					<hr>
 					<input id="chkShoot" type="checkbox">
 					<label for="chkShoot">Click to spray</label>
+				</div>
+
+				<div>
+					<input id="chkLock" type="checkbox">
+					<label for="chkLock">Click to lock</label>
 				</div>
 
 			</div>
@@ -124,169 +152,211 @@
 <script>
 
 	// create scene
-	var scene = new ParticleJS.Scene({
-			width: 800,
-			height: 560,
-			frameBound: false,
-			FPS: 30                 // only if frame bound
-		}),
+	var scene,
+	    emitter,
+	    renderer,
+	    gradient,
 
 		canvas = document.getElementById('canvas'),
-
-		// create renderer and optional gradient
-		renderer = new ParticleJS.CanvasRenderer(canvas),
-		gradient = new ParticleJS.Gradient(),
-		emitter,
 
 		cnt = 0,
 		toggle = false,
 		mx = 100,
 		my = 400,
 		shoot = false,
+		lock = false,
+		isDown = false,
 		brate = 400;
 
-	// define gradient
-	gradient.addStop(0   , '#ffc')
-			.addStop(0.07, '#ff5')
-			.addStop(0.09, '#ff7')
-			.addStop(0.20, '#f70')
-			.addStop(0.40, '#973')
-			.addStop(0.60, '#777')
-			.addStop(1   , '#333');
+	// create scene
+	scene = new ParticleJS.Scene({
+		width: 800,
+		height: 560,
+		frameBound: false,
+		FPS: 30                 // only if frame bound
+	});
 
-	// create emitter
-	emitter = scene.addEmitter({
-			birthRate: brate,       // particles per frame
-			velocity: 300,          // speed each particle is thrown at its direction
-			randomVelocity: 60,     // variation in % between full and full - %
-			life: 3,                // life in seconds
-			spread: 360,            // angle of spread
-			spreadAngle: 0,         // if spread is not 360, angle offset to spread from
-			x: 400,                 // emitter center
-			y: 200,
-			size: 100,              // global (max) diameter in pixels of each particle
-			randomSize: 60,         // size variation in %
-			feather: 36,            // feather in number of pixels
-			randomFeather: 0,
-			gradient: gradient,     // optional gradient (overrides color below)
-			r: 150,                 // base color
-			g: 190,
-			b: 250,
-			opacity: 0.2,           // global opacity, overriden by variation and ramp (opacity over life)
-			randomOpacity: 0,
-			renderer: renderer,     // use this renderer (mandatory)
-			preRender: true         // call pre-render (clears canvas)
-		});
+	// create gradient for emitter
+	gradient = new ParticleJS.Gradient();
 
-	// physics
+	gradient.addStop(0   , 'rgb(248, 252, 238)')
+			.addStop(0.16, 'rgb(239, 230, 120)')
+			.addStop(0.20, 'rgb(235, 123, 37)')
+			.addStop(0.22, 'rgb(196, 54, 0)')
+			.addStop(0.28, 'rgb(78, 21, 2)')
+			.addStop(0.50, '#333')
+			.addStop(1   , '#111');
+
+	// create canvas renderer instance
+	renderer = new ParticleJS.CanvasRenderer(canvas);
+
+	// create an emitter for scene using above renderer
+	emitter = new ParticleJS.Emitter2D({
+		birthRate     : brate,      // particles per frame
+		velocity      : 300,        // speed each particle is thrown at its direction
+		randomVelocity: 60,         // variation in % between full and full - %
+		life          : 3,          // life in seconds
+		spread        : 360,        // angle of spread
+		spreadAngle   : 0,          // if spread is not 360, angle offset to spread from
+		x             : 400,        // emitter center
+		y             : 200,
+		size          : 100,        // global (max) diameter in pixels of each particle
+		randomSize    : 60,         // size variation in %
+		feather       : 36,         // feather in number of pixels
+		randomFeather : 0,
+		gradient      : gradient,   // optional gradient (overrides color below)
+		r             : 150,        // base color
+		g             : 190,
+		b             : 250,
+		opacity       : 0.16,       // global opacity, overridden by variation and ramp (opacity over life)
+		randomOpacity : 0,
+		renderer      : renderer,   // use this renderer (mandatory)
+		preRender     : true        // call pre-render (clears canvas)
+	});
+
+	// add emitter to scene
+	scene.addEmitter(emitter);
+
+	// adjust some physics parameters
 	emitter.physics.gravityY = -0.04;
 	emitter.physics.windX = 0.2;
 	emitter.physics.windY = 0.1;
+	emitter.physics.airResistance = 0.2;
 
-	// over-life arrays
+	// optional over-life arrays
 	emitter.sizeOverLife = new Float32Array([0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
 	emitter.opacityOverLife = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.01]);
 	emitter.featherOverLife = new Float32Array([1]); //new Float32Array([0.01, 0.25, 0.5, 0.75, 0.8, 0.9]);
 
-	// move emitter to mouse position
-	window.onmousemove = function(e) {
+	function getXY(e) {
 		var r = canvas.getBoundingClientRect();
-		mx = e.clientX - r.left;
-		my = e.clientY - r.top;
+		return {
+			x: e.clientX - r.left,
+			y: e.clientY - r.top
+		}
+	}
+
+	// move emitter with mouse position
+	window.onmousemove = function(e) {
+		if (!lock || isDown) {
+			var p = getXY(e);
+			mx = p.x;
+			my = p.y;
+		}
 	};
 
-	// options
-	document.getElementById('rngLife').addEventListener('change', function() {
+	/*
+		Options
+	*/
+
+	addEv('rngLife', 'change', function() {
 		var v = this.value * 0.1;
 		scene.emitters[0].life(v);
 		document.getElementById('outLife').innerHTML = v.toFixed(1);
-	}, false);
+	});
 
-	document.getElementById('rngRate').addEventListener('change', function() {
+	addEv('rngRate', 'change', function() {
 		brate = this.value;
 		if (!shoot) scene.emitters[0].birthRate(brate);
-		document.getElementById('outRate').innerHTML = v;
-	}, false);
+		document.getElementById('outRate').innerHTML = brate;
+	});
 
-	document.getElementById('rngVel').addEventListener('change', function() {
+	addEv('rngVel', 'change', function() {
 		var v = this.value;
 		scene.emitters[0].velocity(v);
 		document.getElementById('outVel').innerHTML = v;
-	}, false);
+	});
 
-	document.getElementById('rngSize').addEventListener('change', function() {
+	addEv('rngSize', 'change', function() {
 		var v = this.value;
 		scene.emitters[0].size(v);
 		document.getElementById('outSize').innerHTML = v;
-	}, false);
+	});
 
-	document.getElementById('rngOpacity').addEventListener('change', function() {
+	addEv('rngOpacity', 'change', function() {
 		var v = this.value * 0.001;
 		scene.emitters[0].opacity(v);
 		document.getElementById('outOpacity').innerHTML = v.toFixed(3);
-	}, false);
+	});
 
-	document.getElementById('rngFeather').addEventListener('change', function() {
+	addEv('rngFeather', 'change', function() {
 		var v = this.value;
 		scene.emitters[0].feather(v);
 		document.getElementById('outFeather').innerHTML = v;
-	}, false);
+	});
 
-	document.getElementById('rngSpread').addEventListener('change', function() {
+	addEv('rngSpread', 'change', function() {
 		var v = this.value;
 		scene.emitters[0].spread(v);
 		document.getElementById('outSpread').innerHTML = v;
-	}, false);
+	});
 
-	document.getElementById('rngSpreadA').addEventListener('change', function() {
+	addEv('rngSpreadA', 'change', function() {
 		var v = this.value;
 		scene.emitters[0].spreadAngle(v);
 		document.getElementById('outSpreadA').innerHTML = v;
-	}, false);
+	});
 
-	document.getElementById('rngWindX').addEventListener('change', function() {
+	addEv('rngWindX', 'change', function() {
 		var v = this.value * 0.1;
 		scene.emitters[0].physics.windX = v;
 		document.getElementById('outWindX').innerHTML = v.toFixed(1);
-	}, false);
+	});
 
-	document.getElementById('rngWindY').addEventListener('change', function() {
+	addEv('rngWindY', 'change', function() {
 		var v = this.value * 0.1;
 		scene.emitters[0].physics.windY = v;
 		document.getElementById('outWindY').innerHTML = v.toFixed(1);
-	}, false);
+	});
 
-	document.getElementById('rngGravY').addEventListener('change', function() {
+	addEv('rngGravY', 'change', function() {
 		var v = this.value * 0.01;
 		scene.emitters[0].physics.gravityY = v;
 		document.getElementById('outGravY').innerHTML = v.toFixed(3);
-	}, false);
+	});
 
+	addEv('rngMagnet', 'change', function() {
+		var v = this.value * 0.1;
+		scene.emitters[0].physics.magnetForce = v;
+		document.getElementById('outMagnet').innerHTML = v.toFixed(1);
+	});
+
+	addEv('rngMagnetR', 'change', function() {
+		var v = this.value;
+		scene.emitters[0].physics.magnetRadius = v;
+		scene.emitters[0].physics.magnetRadiusSqr = v*v;
+		document.getElementById('outMagnetR').innerHTML = v;
+	});
+
+	addEv('chkLock', 'change', function() {
+		lock = !!this.checked;
+	});
 
 	// allow "shooting" (mouse down = birth rate, up = none)
-	document.getElementById('chkShoot').addEventListener('change', function() {
+	addEv('chkShoot', 'change', function() {
 
 		shoot = !!this.checked;
 
 		if (shoot) {
 			scene.emitters[0].birthRate(0);
-
 		}
 		else {
 			scene.emitters[0].birthRate(brate);
-
 		}
-
-
-	}, false);
+	});
 
 	// for shooting
-	canvas.addEventListener('mousedown', function() {
+	canvas.addEventListener('mousedown', function(e) {
 		scene.emitters[0].birthRate(brate);
+		isDown = true;
+		var p = getXY(e);
+		mx = p.x;
+		my = p.y;
 	}, false);
 
 	window.addEventListener('mouseup', function() {
 		if (shoot) scene.emitters[0].birthRate(0);
+		isDown = false;
 	}, false);
 
 	// main loop
@@ -306,9 +376,16 @@
 
 		//cnt++;
 		//if (cnt < 2000)
-			requestAnimationFrame(loop);
+		requestAnimationFrame(loop);
 	})();
 
+	function getEl(id) {
+		return document.getElementById(id);
+	}
+
+	function addEv(id, event, func) {
+		getEl(id).addEventListener(event, func, false);
+	}
 </script>
 </body>
 </html>

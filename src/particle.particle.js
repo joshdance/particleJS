@@ -2,6 +2,7 @@
 	Particle class for ParticleJS
 */
 
+//todo: consider using typed array to represent particle. more clumsy but likely more perf.
 ParticleJS.Particle = function() {
 
 	this.id				= 0;
@@ -16,6 +17,7 @@ ParticleJS.Particle = function() {
 	this.vy				= 0;
 	this.vz				= 0;
 	this.velocity		= 0;
+	this.spreadAngle	= 0;
 
 	this.r				= 255;
 	this.g				= 255;
@@ -42,4 +44,5 @@ ParticleJS.Particle.prototype.updateLife = function(time) {
 
 	this.lifeIndex = Math.max(0, Math.min(lived / this.life, 1));
 	this.isActive = (lifeSpan > 0);
+
 };

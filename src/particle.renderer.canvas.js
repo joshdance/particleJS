@@ -8,15 +8,13 @@ ParticleJS.CanvasRenderer = function(canvas) {
 		h,
 		scnt = 20,
 		sstep = 1 / scnt,
-		ccnt = 16,
-		cstep = 1 / ccnt,
+		ccnt = 20,
 		sw,
 		swHalf,
 		sprite = document.createElement('canvas'),
 		spriteHalf = document.createElement('canvas'),
 		cs = sprite.getContext('2d'),
-		csHalf = spriteHalf.getContext('2d'),
-		lastCol = '';
+		csHalf = spriteHalf.getContext('2d');
 
 	this.init = function(width, height, options) {
 
@@ -31,9 +29,8 @@ ParticleJS.CanvasRenderer = function(canvas) {
 		var sz = options.size,
 			hasGradient = (options.gradient !== null),
 			i = 0,
-			h = 1,
 			featherR,
-			szF = sz * 0.5 - featherR;
+			szF;
 
 		sw = sz;
 		swHalf = (sw * 0.5)|0;
@@ -41,8 +38,10 @@ ParticleJS.CanvasRenderer = function(canvas) {
 		sprite.width = sz * scnt;
 		sprite.height = hasGradient ? sz * ccnt : sz;
 
-		spriteHalf.width = sprite.width * 0.5;
-		spriteHalf.height = sprite.height * 0.5;
+		if (!hasGradient) ccnt = 0;
+
+		spriteHalf.width = sprite.width >> 1;
+		spriteHalf.height = sprite.height >> 1;
 
 		cs.save();
 
@@ -68,21 +67,13 @@ ParticleJS.CanvasRenderer = function(canvas) {
 				cs.drawImage(sprite, 0, 0, sprite.width, i, 0, i, sprite.width, i);
 			}
 
-			cs.globalCompositeOperation = 'source-in';
+			cs.globalCompositeOperation = 'source-atop';
 
 			for(i = 0; i < ccnt; i++) {
 				var c = gradient.getColor(i / ccnt);
 				cs.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-
-				cs.save();
-				cs.beginPath();
-				cs.rect(0, i * sz, sprite.width, sz);
-				cs.clip();
-
 				cs.fillRect(0, i * sz, sprite.width, sz);
-				cs.restore();
 			}
-
 		}
 
 		csHalf.drawImage(sprite, 0, 0, sprite.width, sprite.height,
@@ -102,17 +93,16 @@ ParticleJS.CanvasRenderer = function(canvas) {
 
 		if (p.size < 0.001) return;
 
-		var si = ((scnt * p.feather + 0.5)|0),
-			sx = si * sw,
-			ci = ((ccnt * p.lifeIndex + 0.5)|0),
+		var fi = ((scnt * p.feather + 0.5)|0),			// feather index
+			sx = fi * sw,
+			ci = ((ccnt * p.lifeIndex + 0.5)|0),		// color index
 			sy = ci * sw;
-
-		if (sy > sprite.height) sy = 0;
 
 		ctx.globalAlpha = p.opacity;
 
 		if (p.size > swHalf) {
-			ctx.drawImage(sprite, sx, sy, sw, sw, p.x - p.sizeR, p.y - p.sizeR, p.size, p.size);
+			ctx.drawImage(sprite, sx, sy, sw, sw,
+				p.x - p.sizeR, p.y - p.sizeR, p.size, p.size);
 		}
 		else {
 			ctx.drawImage(spriteHalf, sx>>1, sy>>1, swHalf, swHalf,

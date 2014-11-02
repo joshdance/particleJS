@@ -1,6 +1,15 @@
 Change log for ParticleJS
 -------------------------
 
+0.1.2 ALPHA
+
+IMP: performance improvements
+CHG: emitter must be created manually, then added using same method as before
+ADD: Magnet force (initial behavior, will most likely morph into a different effect
+     and replaced with a more realistic behavior).
+ADD: translate() to emitter to move emitter and all particles incl. old
+     (as moving emitter alone won't affect old particles).
+
 0.1.1 ALPHA
 
 CHG: scene.addEmitter() returns a reference for the created emitter

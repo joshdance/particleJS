@@ -57,7 +57,7 @@ ParticleJS.Gradient.prototype.getColor = function(t) {
 
 	t = Math.min(1, Math.max(0, t));
 
-	var p = ((t * this.width + 0.5)|0) * 3;
+	var p = ((t * this.width)|0) * 3;
 
 	return {
 		r: this.cache[p],
