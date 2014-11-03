@@ -5,8 +5,6 @@
 
 ParticleJS.Physics = function() {
 
-	"use strict";
-
 	this.gravityX = 0;
 	this.gravityY = 0;
 	this.gravityZ = 0;

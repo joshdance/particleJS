@@ -1,6 +1,14 @@
 Change log for ParticleJS
 -------------------------
 
+0.1.3 ALPHA
+
+ADD: Preliminary grid based turbulence physics with custom resolution (perlin noise implemented, todo: vortex)
+CHG: Physics is changed to separate plugins. Each physic model is created separately (wind, magnet, gravity etc.)
+     and added to emitter via addPhysics in the order needed. Each physics plugin has its own methods for
+     adjustments. This adds major flexibility with very little additional performance cost.
+
+
 0.1.2 ALPHA
 
 IMP: performance improvements
@@ -9,6 +17,7 @@ ADD: Magnet force (initial behavior, will most likely morph into a different eff
      and replaced with a more realistic behavior).
 ADD: translate() to emitter to move emitter and all particles incl. old
      (as moving emitter alone won't affect old particles).
+
 
 0.1.1 ALPHA
 
@@ -19,6 +28,7 @@ ADD: Common function for calculating random spread
 ADD: Improved "GC" of empty arrays
 ADD: method on emitter to set render
 FIX: Various minor bugs in ranges
+
 
 0.1.0 ALPHA
 

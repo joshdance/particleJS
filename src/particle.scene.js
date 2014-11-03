@@ -11,8 +11,8 @@ ParticleJS.Scene = function(options) {
 		height			= options.height || 256,						// height of scene
 		mode			= options.mode ? options.mode : '',
 		mode3D			= mode === '3D',								// mode: 0 = 2D, 1 = 3D
-		frameBound		= options.frameBound,							// frame or time bound, def. time
-		FPS		= options.FPS || 60,
+		frameBound		= !!options.frameBound,							// frame or time bound, def. time
+		FPS				= options.FPS || 60,
 
 		lights			= [],
 		cameras			= [],
@@ -48,7 +48,7 @@ ParticleJS.Scene = function(options) {
 		var time = performance.now();
 		for(var pre = 0; pre < frames; pre++) {
 			for(var i = 0, e; e = this.emitters[i++];) {
-				//e.render(1, 16.667, time, true);
+				//e.renderParticles(1, 16.667, time, true);
 			}
 		}
 		return this;
@@ -56,7 +56,6 @@ ParticleJS.Scene = function(options) {
 
 	this.render = function() {
 
-		//TODO only if time bound: else ts=1. plug functions here instead, for perf.
 		var time = performance.now(),
 			diff = time - lastTime,
 			ts = frameBound ? 60 / FPS : diff / 16.6667;
@@ -64,7 +63,10 @@ ParticleJS.Scene = function(options) {
 		lastTime = time;
 
 		for(var i = 0, e; e = this.emitters[i++];) {
-			e.render(ts, diff, time, false);
+			var num = ((e.birthRate() * ts) / diff + 0.5)|0;
+			e.generateParticles(time, num);
+			e.renderParticles(time, ts, diff);
+			e.cleanupParticles(time);
 		}
 
 		return this;

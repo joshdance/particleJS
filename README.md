@@ -12,29 +12,29 @@ The engine is for real-time use, but is work in progress.
 
 **This ALPHA version has implemented:**
 
-- Opacity and opacity over life for each individual particle
-- Feather and feather over life for each individual particle
-- Color gradient for over life change for each individual particle
-- Flexible over life arrays can be of any length and engine will adopt
+- Plugin based render engine (incl. for 2D canvas)
+- Plugin based physics engine (wind, gravity, magnet etc.)
+- Render plugins can be defined to support various particle shapes and render surfaces
+- Opacity, and opacity over-life for each individual particle
+- Feather, and feather over-life for each individual particle
+- Size, and size over-life for each individual particle
+- Solid color, or color gradient for over-life change for each individual particle
+- Flexible over-life arrays can be of any length and engine will adopt
 - Particles per second birth rate
 - Velocity rate
 - Spread angle (z axis only for now which means it only spreads along x and y)
 - Spread angle offset
-- Time or frame bound (latter intended for rendering frames)
-- Plugin based renderer (incl. for 2D canvas)
 - Random variations and amount of it for velocity, size, feather and opacity at birth
-- Physics engine supporting gravity and wind.
-- Engine support pre, post and update calls per emitter for renderer (this allow you
-to share canvas and chain/use several emitters for it, as well as setting up sprite caches).
-- Automatic clean-up of dead particles
-- Additional physic parameters such as magnet (attractor or repeller using negative values)
+- Time or frame bound (latter intended for rendering frames)
+- Render engine supports pre-, post- and update render calls per emitter for renderer (this allow you to share drawing surface).
+- Automatic clean-up of dead particles and particle arrays
 
 **In progress:**
 
+- Centralized sprite caching for 2D bitmap surfaces
 - Z-axis support (2.5D)
 - Additional velocity parameters
 - Improve air resistance of physics engine
-- Particle shape plugins (can be part of the renderer already though)
 - Turbulence for wind (this should perhaps have been placed in below section...)
 - A High-Quality mode if user wants to render frames in a no real-time scenario
 

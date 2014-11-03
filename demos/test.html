@@ -11,7 +11,7 @@
 
 	<style>
 		body {
-			background:#333;
+			background:#171718;
 			color:#ccc;
 			font:14px sans-serif;
 			}
@@ -41,7 +41,7 @@
 		</header>
 
 		<div id="main">
-			<canvas id="canvas" width="512" height="256" style="border:1px solid #000;background:#111"></canvas>
+			<canvas id="canvas" width="512" height="256" style="border:1px solid #000;background:#000"></canvas>
 
 			<div class="options">
 				<div>
@@ -123,6 +123,12 @@
 				</div>
 
 				<div>
+					<label for="rngTurb">Turbulence</label>
+					<input id="rngTurb" type="range" min="0" max="100" value="11">
+					<output id="outTurb">0.11</output>
+				</div>
+
+				<div>
 					<hr>
 					<input id="chkShoot" type="checkbox">
 					<label for="chkShoot">Click to spray</label>
@@ -143,9 +149,12 @@
 
 <script src="../src/particle.core.js"></script>
 <script src="../src/particle.scene.js"></script>
-<script src="../src/particle.emitter2D.js"></script>
-<script src="../src/particle.particle.js"></script>
-<script src="../src/particle.physics.js"></script>
+<script src="../src/particle.emitter2D.point.js"></script>
+<script src="../src/particle.particle2D.js"></script>
+<script src="../src/particle.physics2D.gravity.js"></script>
+<script src="../src/particle.physics2D.wind.js"></script>
+<script src="../src/particle.physics2D.magnet.js"></script>
+<script src="../src/particle.physics2D.turbulence.js"></script>
 <script src="../src/particle.renderer.canvas.js"></script>
 <script src="../src/particle.gradient.js"></script>
 
@@ -156,6 +165,11 @@
 	    emitter,
 	    renderer,
 	    gradient,
+
+	    gravity,
+	    wind,
+	    magnet,
+	    turb,
 
 		canvas = document.getElementById('canvas'),
 
@@ -188,10 +202,12 @@
 			.addStop(1   , '#111');
 
 	// create canvas renderer instance
-	renderer = new ParticleJS.CanvasRenderer(canvas);
+	renderer = new ParticleJS.CanvasRenderer(canvas, {
+		clearOpacity: 1
+	});
 
 	// create an emitter for scene using above renderer
-	emitter = new ParticleJS.Emitter2D({
+	emitter = new ParticleJS.Emitter2D.Point({
 		birthRate     : brate,      // particles per frame
 		velocity      : 300,        // speed each particle is thrown at its direction
 		randomVelocity: 60,         // variation in % between full and full - %
@@ -217,11 +233,17 @@
 	// add emitter to scene
 	scene.addEmitter(emitter);
 
-	// adjust some physics parameters
-	emitter.physics.gravityY = -0.04;
-	emitter.physics.windX = 0.2;
-	emitter.physics.windY = 0.1;
-	emitter.physics.airResistance = 0.2;
+	// create the physics models we want to use
+	gravity = new ParticleJS.Physics2D.Gravity(0, -0.04);
+	wind = new ParticleJS.Physics2D.Wind(0.2, 0.1);
+	magnet = new ParticleJS.Physics2D.Magnet(400, 300);
+	turb = new ParticleJS.Physics2D.Turbulence(64, 64, 0.11);
+
+	// add the physics models in the order we want
+	emitter.addPhysics(gravity);
+	emitter.addPhysics(wind);
+	emitter.addPhysics(magnet);
+	emitter.addPhysics(turb);
 
 	// optional over-life arrays
 	emitter.sizeOverLife = new Float32Array([0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
@@ -251,81 +273,86 @@
 
 	addEv('rngLife', 'change', function() {
 		var v = this.value * 0.1;
-		scene.emitters[0].life(v);
+		emitter.life(v);
 		document.getElementById('outLife').innerHTML = v.toFixed(1);
 	});
 
 	addEv('rngRate', 'change', function() {
 		brate = this.value;
-		if (!shoot) scene.emitters[0].birthRate(brate);
+		if (!shoot) emitter.birthRate(brate);
 		document.getElementById('outRate').innerHTML = brate;
 	});
 
 	addEv('rngVel', 'change', function() {
 		var v = this.value;
-		scene.emitters[0].velocity(v);
+		emitter.velocity(v);
 		document.getElementById('outVel').innerHTML = v;
 	});
 
 	addEv('rngSize', 'change', function() {
 		var v = this.value;
-		scene.emitters[0].size(v);
+		emitter.size(v);
 		document.getElementById('outSize').innerHTML = v;
 	});
 
 	addEv('rngOpacity', 'change', function() {
 		var v = this.value * 0.001;
-		scene.emitters[0].opacity(v);
+		emitter.opacity(v);
 		document.getElementById('outOpacity').innerHTML = v.toFixed(3);
 	});
 
 	addEv('rngFeather', 'change', function() {
 		var v = this.value;
-		scene.emitters[0].feather(v);
+		emitter.feather(v);
 		document.getElementById('outFeather').innerHTML = v;
 	});
 
 	addEv('rngSpread', 'change', function() {
 		var v = this.value;
-		scene.emitters[0].spread(v);
+		emitter.spread(v);
 		document.getElementById('outSpread').innerHTML = v;
 	});
 
 	addEv('rngSpreadA', 'change', function() {
 		var v = this.value;
-		scene.emitters[0].spreadAngle(v);
+		emitter.spreadAngle(v);
 		document.getElementById('outSpreadA').innerHTML = v;
 	});
 
 	addEv('rngWindX', 'change', function() {
 		var v = this.value * 0.1;
-		scene.emitters[0].physics.windX = v;
+		wind.setX(v);
 		document.getElementById('outWindX').innerHTML = v.toFixed(1);
 	});
 
 	addEv('rngWindY', 'change', function() {
 		var v = this.value * 0.1;
-		scene.emitters[0].physics.windY = v;
+		wind.setY(v);
 		document.getElementById('outWindY').innerHTML = v.toFixed(1);
 	});
 
 	addEv('rngGravY', 'change', function() {
 		var v = this.value * 0.01;
-		scene.emitters[0].physics.gravityY = v;
+		gravity.setY(v);
 		document.getElementById('outGravY').innerHTML = v.toFixed(3);
 	});
 
 	addEv('rngMagnet', 'change', function() {
 		var v = this.value * 0.1;
-		scene.emitters[0].physics.magnetForce = v;
+		magnet.setForce(v);
 		document.getElementById('outMagnet').innerHTML = v.toFixed(1);
 	});
 
 	addEv('rngMagnetR', 'change', function() {
 		var v = this.value;
-		scene.emitters[0].physics.magnetRadius = v;
-		scene.emitters[0].physics.magnetRadiusSqr = v*v;
+		magnet.setRadius(+v);
 		document.getElementById('outMagnetR').innerHTML = v;
+	});
+
+	addEv('rngTurb', 'change', function() {
+		var v = this.value * 0.01;
+		turb.setForce(+v);
+		document.getElementById('outTurb').innerHTML = v.toFixed(2);
 	});
 
 	addEv('chkLock', 'change', function() {
@@ -338,16 +365,16 @@
 		shoot = !!this.checked;
 
 		if (shoot) {
-			scene.emitters[0].birthRate(0);
+			emitter.birthRate(0);
 		}
 		else {
-			scene.emitters[0].birthRate(brate);
+			emitter.birthRate(brate);
 		}
 	});
 
 	// for shooting
 	canvas.addEventListener('mousedown', function(e) {
-		scene.emitters[0].birthRate(brate);
+		emitter.birthRate(brate);
 		isDown = true;
 		var p = getXY(e);
 		mx = p.x;
@@ -355,7 +382,7 @@
 	}, false);
 
 	window.addEventListener('mouseup', function() {
-		if (shoot) scene.emitters[0].birthRate(0);
+		if (shoot) emitter.birthRate(0);
 		isDown = false;
 	}, false);
 
@@ -371,8 +398,8 @@
 
 		scene.render();
 
-		scene.emitters[0].x = mx;
-		scene.emitters[0].y = my;
+		emitter.x = mx;
+		emitter.y = my;
 
 		//cnt++;
 		//if (cnt < 2000)

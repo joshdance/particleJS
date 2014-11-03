@@ -3,19 +3,20 @@
 */
 
 //todo: consider using typed array to represent particle. more clumsy but likely more perf.
-ParticleJS.Particle = function() {
+//tests shows there is probably no benefit doing that, quite the contrary.. objects has become very fast....
+ParticleJS.Particle2D = function() {
 
 	this.id				= 0;
 
 	this.x				= 0;
 	this.y				= 0;
-	this.z				= 0;
-	this.px				= 0;
-	this.py				= 0;
-	this.pz				= 0;
+	//this.z				= 0;
+	//this.px				= 0;			// prev. position
+	//this.py				= 0;
+	//this.pz				= 0;
 	this.vx				= 0;
 	this.vy				= 0;
-	this.vz				= 0;
+	//this.vz				= 0;
 	this.velocity		= 0;
 	this.spreadAngle	= 0;
 
@@ -37,12 +38,14 @@ ParticleJS.Particle = function() {
 	this.isActive		= true;
 };
 
-ParticleJS.Particle.prototype.updateLife = function(time) {
+ParticleJS.Particle2D.prototype.updateLife = function(time) {
 
-	var lived = time - this.born,
-		lifeSpan = this.life - lived;
+	if (this.isActive) {
+		var lived = time - this.born,
+			lifeSpan = this.life - lived;
 
-	this.lifeIndex = Math.max(0, Math.min(lived / this.life, 1));
-	this.isActive = (lifeSpan > 0);
+		this.lifeIndex = Math.max(0, Math.min(lived / this.life, 1));
+		this.isActive = (lifeSpan > 0);
+	}
 
 };

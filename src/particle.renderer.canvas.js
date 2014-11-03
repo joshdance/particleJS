@@ -1,11 +1,14 @@
 
 // setup, render, destroy
 
-ParticleJS.CanvasRenderer = function(canvas) {
+ParticleJS.CanvasRenderer = function(canvas, options) {
+
+	options = options || {};
 
 	var ctx,
 		w,
 		h,
+		clearOpacity = options.clearOpacity || 1,
 		scnt = 20,
 		sstep = 1 / scnt,
 		ccnt = 20,
@@ -16,12 +19,10 @@ ParticleJS.CanvasRenderer = function(canvas) {
 		cs = sprite.getContext('2d'),
 		csHalf = spriteHalf.getContext('2d');
 
-	this.init = function(width, height, options) {
-
+	this.init = function(width, height) {
 		ctx = canvas.getContext('2d');
 		w = canvas.width = width;
 		h = canvas.height = height;
-
 	};
 
 	this.setup = function(width, height, options) {
@@ -83,10 +84,16 @@ ParticleJS.CanvasRenderer = function(canvas) {
 			ctx.webkitImageSmoothingEnabled =
 				ctx.imageSmoothingEnabled = false;
 
+		ctx.fillStyle = 'rgba(0,0,0,' + clearOpacity + ')';
 	};
 
 	this.preRender = function() {
-		ctx.clearRect(0, 0, w, h);
+		if (clearOpacity < 1) {
+			ctx.fillRect(0, 0, w, h);
+		}
+		else {
+			ctx.clearRect(0, 0, w, h);
+		}
 	};
 
 	this.renderParticle = function(p) {
@@ -114,4 +121,10 @@ ParticleJS.CanvasRenderer = function(canvas) {
 	this.postRender = function() {
 	};
 
+	// methods for this renderer
+
+	this.clearOpacity = function(o) {
+		clearOpacity = o;
+		return this;
+	};
 };

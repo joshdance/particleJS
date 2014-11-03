@@ -1,5 +1,5 @@
 /*!
- *	ParticleJS version 0.1.2 ALPHA
+ *	ParticleJS version 0.1.3 ALPHA
  *
  *	By Epistemex (c) 2014
  *	www.epistemex.com
@@ -7,7 +7,11 @@
 
 "use strict";
 
-var ParticleJS = {};
+var ParticleJS = {
+	Physics2D: {},
+	Emitter2D: {},
+	Emitter3D: {}
+};
 
 Array.prototype.forEach = function(fn, context) {
 

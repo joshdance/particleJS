@@ -2,9 +2,7 @@
 	2D Emitter class for ParticleJS
  */
 
-"use strict";
-
-ParticleJS.Emitter2D = function(options) {
+ParticleJS.Emitter2D.Point = function(options) {
 
 	options = options || {};
 
@@ -37,16 +35,15 @@ ParticleJS.Emitter2D = function(options) {
 		preRender		= options.preRender,
 		postRender		= options.postRender,
 
-		count			= 0,
+		count			= 0,			// active particles
 
 		particles		= [],
+		physics			= [],
 		cleanStamp		= 0,
 		cleanInt		= 1000
 		;
 
-
 	// Check gradient
-
 	if (gradient) {
 		if (Array.isArray(gradient)) {
 			gradient = {
@@ -58,105 +55,91 @@ ParticleJS.Emitter2D = function(options) {
 		}
 	}
 
+	// called from scene
 	this.init = function(width, height) {
 		w = width;
 		h = height;
 		if (options.renderer) me.setRenderer(options.renderer);
 	};
 
-
 	/*
-		Create particles
+		Generate and render particles
 	*/
 
-	this.render = function(ts, diff, time) {
+	this.generateParticles = function(time, num) {
 
-		var num = ((birthRate * ts) / diff + 0.5)|0,
-			phys = this.physics;
+		var	parts = [],
+		    angle = 0,
+		    vel = 0,
+		    vx = 0,
+		    vy = 0,
+		    sz = 0,
+		    o = 0,
+		    f = 0,
+		    em = me,
+		    ool = getOpacityOverLife(0),
+		    fol = getFeatherOverLife(0),
+		    sol = getSizeOverLife(0);
 
-		//TODO Use remainder which accumulates per update
+		// produce number of particles
+		while(num--) {
 
-		//if (num < 1) num = 1;	//TODO if true, exit instead as we will use remainder
+			angle = spreadRad * Math.random() + spreadAngleRad;
 
-		if (preRender) renderer.preRender();
+			vel = getSpreadValue(velocity, rndVelocity);
+			sz = getSpreadValue(size, rndSize);
+			o = getSpreadValue(opacity, rndOpacity);
+			f = getSpreadValue(feather, rndFeather);
+
+			vx = vel * Math.cos(angle);
+			vy = vel * Math.sin(angle);
+
+			var p = new ParticleJS.Particle2D();
+
+			p.id = ++pID;
+			p.x = em.x;
+			p.y = em.y;
+			p.vx = vx;
+			p.vy = vy;
+			p.angle = angle;
+			p.sizeO = sz;
+			p.size = p.sizeO * sol;
+			p.sizeR = p.sizeO * .5;
+			p.life = life;
+			p.born = time;
+
+			p.r = red;
+			p.g = green;
+			p.b = blue;
+
+			p.opacityO = o;
+			p.opacity = o * ool;
+
+			p.featherO = feather;
+			p.feather = feather * fol;
+
+			parts.push(p);
+		}
+
+		// add to global array
+		particles.push(parts);
+
+		function getSpreadValue(v, spread) {
+			return v - (spread * v * Math.random());
+		}
+
+	};
+
+	this.renderParticles = function(time, ts, diff) {
 
 		count = 0;
 
-		if (num) generateParticles(particles, num);
-		pushParticles(particles);
-
+		// main
+		if (preRender) renderer.preRender();
+		pushParticles(particles, physics);			// push particles to drawing surface
 		if (postRender) renderer.postRender();
 
-		// clean-up empty arrays. todo: find ideal time int.
-		if (time - cleanInt > cleanStamp) {
-			cleanStamp = time;
-			// rebuild array wins over slice away: http://jsperf.com/slice-away-versus-rebuilding-array
-			var tParticles = [];
-			for(var i = 0, p; p = particles[i++];) if (p.length) tParticles.push(p);
-			particles = tParticles;
-			tParticles = null;
-		}
-
-		function generateParticles(particles, num) {
-
-			var	parts = [],
-				angle = 0,
-				vel = 0,
-				vx = 0,
-				vy = 0,
-				sz = 0,
-				o = 0,
-				f = 0,
-				em = me,
-				ool = getOpacityOverLife(0),
-				fol = getFeatherOverLife(0),
-				sol = getSizeOverLife(0);
-
-				// produce number of particles
-			while(num--) {
-
-				angle = spreadRad * Math.random() + spreadAngleRad;
-
-				vel = getSpreadValue(velocity, rndVelocity);
-				sz = getSpreadValue(size, rndSize);
-				o = getSpreadValue(opacity, rndOpacity);
-				f = getSpreadValue(feather, rndFeather);
-
-				vx = vel * Math.cos(angle);
-				vy = vel * Math.sin(angle);
-
-				var p = new ParticleJS.Particle();
-
-				p.id = ++pID;
-				p.x = em.x;
-				p.y = em.y;
-				p.vx = vx;
-				p.vy = vy;
-				p.angle = angle;
-				p.sizeO = sz;
-				p.size = p.sizeO * sol;
-				p.sizeR = p.sizeO * .5;
-				p.life = life;
-				p.born = time;
-
-				p.r = red;
-				p.g = green;
-				p.b = blue;
-
-				p.opacityO = o;
-				p.opacity = o * ool;
-
-				p.featherO = feather;
-				p.feather = feather * fol;
-
-				parts.push(p);
-			}
-
-			// add to global array
-			particles.push(parts);
-		}
-
-		function pushParticles(particles) {
+		function pushParticles(particles, physics) {
 
 			var i = -1,
 				len = particles.length,
@@ -172,83 +155,92 @@ ParticleJS.Emitter2D = function(options) {
 
 				part.forEach(function(p) {
 
+					p.updateLife(time);
+
 					if (p.isActive) {
 
-						//count++;
+						population = true;
 
-						p.updateLife(time);
+						count++;
 
-						if (p.isActive) {
-							var pi = p.lifeIndex;
-							p.opacity = p.opacityO * getOpacityOverLife(pi);
-							p.feather = p.featherO * getFeatherOverLife(pi);
-							p.size = p.sizeO * getSizeOverLife(pi);
-							p.sizeR = p.size * 0.5;
+						var pi = p.lifeIndex;
+						p.opacity = p.opacityO * getOpacityOverLife(pi);
+						p.feather = p.featherO * getFeatherOverLife(pi);
+						p.size = p.sizeO * getSizeOverLife(pi);
+						p.sizeR = p.size * 0.5;
 
-							population = true;
-
-							// calc. velocity vector based on physics and local properties of particle
+						// calc. velocity vector based on physics and local properties of particle
+						physics.forEach(function(phys) {
 							phys.apply(p, ts);
+						});
 
-							renderer.renderParticle(p);
-						}
+						// update position
+						p.x += p.vx;
+						p.y += p.vy;
 
-					}	// active
+						renderer.renderParticle(p);
+					}
 
 				});	// forEach
 
 				if (!population) particles[i] = [];
 
 			}	// i
-
-		}
-
-		function getSpreadValue(v, spread) {
-			return v - (spread * v * Math.random());
-		}
-
-		function getSizeOverLife(t) {
-
-			//t = Math.min(1, Math.max(0, t));
-
-			var a = me.sizeOverLife,
-				l = a.length,
-				i = (l * t + 0.5)|0;
-
-			return a[i] || 0;
-		}
-
-		function getOpacityOverLife(t) {
-
-			var a = me.opacityOverLife,
-				l = a.length,
-				i = (l * t + 0.5)|0;
-
-			//if (i < 0) i = 0;
-
-			return a[i] || 1;
-		}
-
-		function getFeatherOverLife(t) {
-
-			var a = me.featherOverLife,
-				l = a.length,
-				i = (l * t + 0.5)|0;
-
-			return a[i] || 1;
 		}
 
 	};
 
+	this.cleanupParticles = function(time) {
+
+		// clean-up empty arrays. todo: find ideal time int.
+		if (time - cleanInt > cleanStamp) {
+			cleanStamp = time;
+			// rebuild array wins over slice away: http://jsperf.com/slice-away-versus-rebuilding-array
+			var tParticles = [];
+			for(var i = 0, p; p = particles[i++];) if (p.length) tParticles.push(p);
+			particles = tParticles;
+			tParticles = null;
+		}
+
+	};
+
+	function getSizeOverLife(t) {
+
+		//t = Math.min(1, Math.max(0, t));
+
+		var a = me.sizeOverLife,
+			l = a.length,
+			i = (l * t + 0.5)|0;
+
+		return a[i] || 0;
+	}
+
+	function getOpacityOverLife(t) {
+
+		var a = me.opacityOverLife,
+			l = a.length,
+			i = (l * t + 0.5)|0;
+
+		//if (i < 0) i = 0;
+
+		return a[i] || 1;
+	}
+
+	function getFeatherOverLife(t) {
+
+		var a = me.featherOverLife,
+			l = a.length,
+			i = (l * t + 0.5)|0;
+
+		return a[i] || 1;
+	}
 
 	/*
 	 Settings
 	 */
 
-	this.x = typeof options.x === 'number' ? options.x : w * 0.5;
-	this.y = typeof options.y === 'number' ? options.y : h * 0.5;
-
-	this.physics = new ParticleJS.Physics();
+	this.x = options.x;
+	this.y = options.y;
 
 	this.sizeOverLife = new Float32Array([1]);
 	this.opacityOverLife = new Float32Array([1]);
@@ -258,30 +250,33 @@ ParticleJS.Emitter2D = function(options) {
 	 Methods
 	 */
 
+	this.addPhysics = function(phys) {
+		if (phys.apply) {
+			physics.push(phys);
+			phys.init(w, h);
+		}
+		return this;
+	};
+
 	this.setRenderer = function(r) {
 
 		renderer = r;
 
-		if (renderer) renderer.init(w, h, {
-			size: size,
-			r: red,
-			g: green,
-			b: blue,
-			feather: feather,
-			opacity: opacity,
-			gradient: gradient
-		});
+		if (renderer) {
+			// initial call to set up drawing surface
+			renderer.init(w, h);
 
-		// first call to setup - may be called several times if size etc. changes
-		if (renderer) renderer.setup(w, h, {
-			size: size,
-			r: red,
-			g: green,
-			b: blue,
-			feather: feather,
-			opacity: opacity,
-			gradient: gradient
-		});
+			// first call to setup - may be called several times if size etc. changes
+			renderer.setup(w, h, {
+				size    : 100,	// max particle size for sprite sheet
+				feather : feather,
+				opacity : opacity,
+				r       : red,
+				g       : green,
+				b       : blue,
+				gradient: gradient
+			});
+		}
 
 		return this;
 	};
