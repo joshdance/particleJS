@@ -13,7 +13,7 @@ The engine is for real-time use, but is work in progress.
 **This ALPHA version has implemented:**
 
 - Plugin based render engine (incl. for 2D canvas)
-- Plugin based physics engine (wind, gravity, magnet etc.)
+- Plugin based physics engine (wind, gravity, turbulence, magnet etc.)
 - Render plugins can be defined to support various particle shapes and render surfaces
 - Opacity, and opacity over-life for each individual particle
 - Feather, and feather over-life for each individual particle
