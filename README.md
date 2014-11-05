@@ -1,19 +1,19 @@
 ﻿ParticleJS
 ==========
 
-**ParticleJS is a particle engine for JavaScript** and typically canvas,
+**ParticleJS is a real-time particle engine for JavaScript** and typically canvas,
 although not limited to.
 
 With this particle engine you can make real-time effects such as smoke, flames, dust, clouds
 and explosions. You can also create fluids and ambient effects. As it uses
-a plugin model for renderer you can render a particle in unlimited ways.
+a plugin model for rendering and physics you can render a particle in unlimited ways.
 
-The engine is for real-time use, but is work in progress.
+The engine is for real-time use, but still very early work in progress.
 
 **This ALPHA version has implemented:**
 
 - Plugin based render engine (incl. for 2D canvas)
-- Plugin based physics engine (wind, gravity, turbulence, magnet etc.)
+- Plugin based physics engine (wind, gravity, turbulence, vortex etc.)
 - Render plugins can be defined to support various particle shapes and render surfaces
 - Opacity, and opacity over-life for each individual particle
 - Feather, and feather over-life for each individual particle
@@ -25,17 +25,17 @@ The engine is for real-time use, but is work in progress.
 - Spread angle (z axis only for now which means it only spreads along x and y)
 - Spread angle offset
 - Random variations and amount of it for velocity, size, feather and opacity at birth
-- Time or frame bound (latter intended for rendering frames)
+- Time or frame bound (latter intended for rendering frames). Will adopt to current frame rate providing
+as smooth as possible animation.
 - Render engine supports pre-, post- and update render calls per emitter for renderer (this allow you to share drawing surface).
 - Automatic clean-up of dead particles and particle arrays
 
-**In progress:**
+**In progress / evaluated:**
 
 - Centralized sprite caching for 2D bitmap surfaces
 - Z-axis support (2.5D)
 - Additional velocity parameters
-- Improve air resistance of physics engine
-- Turbulence for wind (this should perhaps have been placed in below section...)
+- Improve air resistance of physics wind engine
 - A High-Quality mode if user wants to render frames in a no real-time scenario
 
 **MAYBE... and most likely only for a web-gl renderer:**
@@ -46,9 +46,14 @@ The engine is for real-time use, but is work in progress.
 - Visual editor to create curves for "over-life" features, and:
 - Visual editor to setup an emitter and particles, and to generate code for it
 
-![snapshot 1](http://i.imgur.com/Hrdkicd.jpg)
+![snapshot 1](http://i.imgur.com/H4DvC13.png)<br>
+<sup>200 particles/s @ 2.8s life, gradient, turbulence, 2x vortexes, magnet (also vortex based ) opacity and size over life @ 60 FPS</sup>
 
-![snapshot 2](http://i.imgur.com/2XahkZR.jpg)
+![snapshot 2](http://i.imgur.com/RosB7NO.png)<br>
+<sup>Visual representation of the turbulence grid from the turbulence noise physics plugin</sup>
+
+![snapshot 3](http://i.imgur.com/sbAbNwR.png)<br>
+<sup>Single vortex map representation with gradient radial force mapping and suction. Several can be combined.</sup>
 
 Usage
 -----

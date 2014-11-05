@@ -2,58 +2,30 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-	<meta name="viewport" content="width=device-width; initial-scale=1.0">
-	<meta name="description" content="">
-	<meta name="author" content="(C) Epistemex">
-
-	<title>Proof-of-concept ParticleJS</title>
-
-	<style>
-		body {
-			background:#171718;
-			color:#ccc;
-			font:14px sans-serif;
-			}
-
-		.options{
-			float:right;
-			width:500px;
-			}
-
-		label {
-			display:inline-block;
-			width:100px;
-			}
-		output {
-			text-align: right;
-			display:inline-block;
-			width:50px;
-			}
-	</style>
-
+	<title>ParticleJS</title>
+	<link rel="stylesheet" type="text/css" href="css/test.css" />
 </head>
 <body>
 
 	<div id="container">
 		<header>
-			<h1>ParticleJS testbench</h1>
+			<h1>ParticleJS</h1>
 		</header>
 
 		<div id="main">
-			<canvas id="canvas" width="512" height="256" style="border:1px solid #000;background:#000"></canvas>
+			<canvas id="canvas" width="512" height="256"></canvas>
 
 			<div class="options">
 				<div>
 					<label for="rngLife">Life (s)</label>
-					<input id="rngLife" type="range" min="5" max="200" value="30">
-					<output id="outLife">3</output>
+					<input id="rngLife" type="range" min="5" max="200" value="28">
+					<output id="outLife">2.8</output>
 				</div>
 
 				<div>
 					<label for="rngRate">Birth-rate</label>
-					<input id="rngRate" type="range" min="1" max="2000" value="400">
-					<output id="outRate">400</output>
+					<input id="rngRate" type="range" min="1" max="2000" value="200">
+					<output id="outRate">200</output>
 				</div>
 
 				<div>
@@ -70,8 +42,8 @@
 
 				<div>
 					<label for="rngFeather">Feather</label>
-					<input id="rngFeather" type="range" min="0" max="50" value="36">
-					<output id="outFeather">36</output>
+					<input id="rngFeather" type="range" min="0" max="100" value="50">
+					<output id="outFeather">50</output>
 				</div>
 
 				<div>
@@ -81,9 +53,9 @@
 				</div>
 
 				<div>
-					<label for="rngSpread">Spread</label>
-					<input id="rngSpread" type="range" min="0" max="359" value="359">
-					<output id="outSpread">359</output>
+					<label for="rngSpread">Spread angle</label>
+					<input id="rngSpread" type="range" min="0" max="360" value="360">
+					<output id="outSpread">360</output>
 				</div>
 
 				<div>
@@ -92,22 +64,24 @@
 					<output id="outSpreadA">0</output>
 				</div>
 
+				<hr>
+
 				<div>
 					<label for="rngWindX">Wind X</label>
-					<input id="rngWindX" type="range" min="-50" max="50" value="20">
-					<output id="outWindX">0.2</output>
+					<input id="rngWindX" type="range" min="-50" max="50" value="0">
+					<output id="outWindX">0</output>
 				</div>
 
 				<div>
 					<label for="rngWindY">Wind Y</label>
-					<input id="rngWindY" type="range" min="-30" max="30" value="10">
-					<output id="outWindY">0.1</output>
+					<input id="rngWindY" type="range" min="-30" max="30" value="0">
+					<output id="outWindY">0</output>
 				</div>
 
 				<div>
 					<label for="rngGravY">Gravity Y</label>
-					<input id="rngGravY" type="range" min="-20" max="20" value="4">
-					<output id="outGravY">0.04</output>
+					<input id="rngGravY" type="range" min="-20" max="20" value="0">
+					<output id="outGravY">0</output>
 				</div>
 
 				<div>
@@ -124,12 +98,27 @@
 
 				<div>
 					<label for="rngTurb">Turbulence</label>
-					<input id="rngTurb" type="range" min="0" max="100" value="11">
-					<output id="outTurb">0.11</output>
+					<input id="rngTurb" type="range" min="0" max="100" value="0">
+					<output id="outTurb">0</output>
+				</div>
+
+				<hr>
+
+				<div>
+					<label for="rngVortex1">Vortex 1</label>
+					<input id="rngVortex1" type="range" min="0" max="100" value="0">
+					<output id="outVortex1">0</output>
 				</div>
 
 				<div>
-					<hr>
+					<label for="rngVortex2">Vortex 2</label>
+					<input id="rngVortex2" type="range" min="0" max="100" value="0">
+					<output id="outVortex2">0</output>
+				</div>
+
+				<hr>
+
+				<div>
 					<input id="chkShoot" type="checkbox">
 					<label for="chkShoot">Click to spray</label>
 				</div>
@@ -139,6 +128,14 @@
 					<label for="chkLock">Click to lock</label>
 				</div>
 
+				<div>
+					<input id="chkMap" type="checkbox">
+					<label for="chkMap" style="width:160px">Show turbulence map</label>
+				</div>
+
+				<div>
+					<button id="btnNewTurb">Generate new turbulence map</button>
+				</div>
 			</div>
 		</div>
 
@@ -153,9 +150,10 @@
 <script src="../src/particle.particle2D.js"></script>
 <script src="../src/particle.physics2D.gravity.js"></script>
 <script src="../src/particle.physics2D.wind.js"></script>
-<script src="../src/particle.physics2D.magnet.js"></script>
-<script src="../src/particle.physics2D.turbulence.js"></script>
-<script src="../src/particle.renderer.canvas.js"></script>
+<script src="../src/particle.physics2D.turbulence.tools.js"></script>
+<script src="../src/particle.physics2D.turbulence.noise.js"></script>
+<script src="../src/particle.physics2D.turbulence.vortex.js"></script>
+<script src="../src/particle.render.canvas2D.js"></script>
 <script src="../src/particle.gradient.js"></script>
 
 <script>
@@ -170,24 +168,27 @@
 	    wind,
 	    magnet,
 	    turb,
+	    vortex1,
+	    vortex2,
 
 		canvas = document.getElementById('canvas'),
+		tmap = null,
 
 		cnt = 0,
 		toggle = false,
-		mx = 100,
-		my = 400,
+		mx = 400,
+		my = 200,
 		shoot = false,
 		lock = false,
 		isDown = false,
-		brate = 400;
+		brate = 200;
 
 	// create scene
 	scene = new ParticleJS.Scene({
 		width: 800,
 		height: 560,
 		frameBound: false,
-		FPS: 30                 // only if frame bound
+		FPS: 60                 // only if frame bound
 	});
 
 	// create gradient for emitter
@@ -202,7 +203,7 @@
 			.addStop(1   , '#111');
 
 	// create canvas renderer instance
-	renderer = new ParticleJS.CanvasRenderer(canvas, {
+	renderer = new ParticleJS.Render.Canvas2D(canvas, {
 		clearOpacity: 1
 	});
 
@@ -218,7 +219,7 @@
 		y             : 200,
 		size          : 100,        // global (max) diameter in pixels of each particle
 		randomSize    : 60,         // size variation in %
-		feather       : 36,         // feather in number of pixels
+		feather       : 50,         // feather in %
 		randomFeather : 0,
 		gradient      : gradient,   // optional gradient (overrides color below)
 		r             : 150,        // base color
@@ -234,21 +235,28 @@
 	scene.addEmitter(emitter);
 
 	// create the physics models we want to use
-	gravity = new ParticleJS.Physics2D.Gravity(0, -0.04);
-	wind = new ParticleJS.Physics2D.Wind(0.2, 0.1);
-	magnet = new ParticleJS.Physics2D.Magnet(400, 300);
-	turb = new ParticleJS.Physics2D.Turbulence(64, 64, 0.11);
+	gravity = new ParticleJS.Physics2D.Gravity(0, 0);
+	wind    = new ParticleJS.Physics2D.Wind(0, 0);
+	magnet  = new ParticleJS.Physics2D.Turbulence.Vortex(400, 300, 100, 32, 32, 0).suction(1); // set max suction and it becomes a magnet
+	turb    = new ParticleJS.Physics2D.Turbulence.Noise(32, 24, 0);
+	vortex1 = new ParticleJS.Physics2D.Turbulence.Vortex(300, 200, 200, 32, 32, 0);
+	vortex2 = new ParticleJS.Physics2D.Turbulence.Vortex(600, 320, 120, 32, 32, 0);
 
 	// add the physics models in the order we want
+	emitter.addPhysics(turb);
+	emitter.addPhysics(vortex1);
+	emitter.addPhysics(vortex2);
+	emitter.addPhysics(magnet);
 	emitter.addPhysics(gravity);
 	emitter.addPhysics(wind);
-	emitter.addPhysics(magnet);
-	emitter.addPhysics(turb);
+
+	//document.body.appendChild(vortex1.getMap());
+	//document.body.appendChild(vortex2.getMap());
 
 	// optional over-life arrays
-	emitter.sizeOverLife = new Float32Array([0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+	emitter.sizeOverLife = new Float32Array([0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.7, 0.5]);
 	emitter.opacityOverLife = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.01]);
-	emitter.featherOverLife = new Float32Array([1]); //new Float32Array([0.01, 0.25, 0.5, 0.75, 0.8, 0.9]);
+	emitter.featherOverLife = new Float32Array([1]); //new Float32Array([0, 0.25, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
 
 	function getXY(e) {
 		var r = canvas.getBoundingClientRect();
@@ -334,29 +342,50 @@
 	addEv('rngGravY', 'change', function() {
 		var v = this.value * 0.01;
 		gravity.setY(v);
-		document.getElementById('outGravY').innerHTML = v.toFixed(3);
+		document.getElementById('outGravY').innerHTML = v.toFixed(2);
 	});
 
 	addEv('rngMagnet', 'change', function() {
 		var v = this.value * 0.1;
-		magnet.setForce(v);
+		magnet.force(v);
 		document.getElementById('outMagnet').innerHTML = v.toFixed(1);
 	});
 
 	addEv('rngMagnetR', 'change', function() {
 		var v = this.value;
-		magnet.setRadius(+v);
+		magnet.radius(+v);
 		document.getElementById('outMagnetR').innerHTML = v;
 	});
 
 	addEv('rngTurb', 'change', function() {
 		var v = this.value * 0.01;
-		turb.setForce(+v);
+		turb.force(+v);
 		document.getElementById('outTurb').innerHTML = v.toFixed(2);
+	});
+
+	addEv('rngVortex1', 'change', function() {
+		var v = this.value * 0.01;
+		vortex1.force(+v);
+		document.getElementById('outVortex1').innerHTML = v.toFixed(2);
+	});
+
+	addEv('rngVortex2', 'change', function() {
+		var v = this.value * 0.01;
+		vortex2.force(+v);
+		document.getElementById('outVortex2').innerHTML = v.toFixed(2);
 	});
 
 	addEv('chkLock', 'change', function() {
 		lock = !!this.checked;
+	});
+
+	addEv('chkMap', 'change', function() {
+		if (this.checked) {
+			canvas.style.background = 'url(' + turb.getMap().toDataURL() + ')';
+		}
+		else {
+			canvas.style.background = '#000';
+		}
 	});
 
 	// allow "shooting" (mouse down = birth rate, up = none)
@@ -372,13 +401,22 @@
 		}
 	});
 
+	addEv('btnNewTurb', 'click', function() {
+		turb.generateNew();
+		if (chkMap.checked) {
+			canvas.style.background = 'url(' + turb.getMap().toDataURL() + ')';
+		}
+	});
+
 	// for shooting
 	canvas.addEventListener('mousedown', function(e) {
-		emitter.birthRate(brate);
 		isDown = true;
 		var p = getXY(e);
 		mx = p.x;
 		my = p.y;
+		emitter.x = mx;
+		emitter.y = my;
+		emitter.birthRate(brate);
 	}, false);
 
 	window.addEventListener('mouseup', function() {

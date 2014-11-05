@@ -51,7 +51,7 @@ ParticleJS.Emitter2D.Point = function(options) {
 			};
 		}
 		else {
-			gradient.generate();
+			gradient.generateNew();
 		}
 	}
 
@@ -171,12 +171,12 @@ ParticleJS.Emitter2D.Point = function(options) {
 
 						// calc. velocity vector based on physics and local properties of particle
 						physics.forEach(function(phys) {
-							phys.apply(p, ts);
+							phys.apply(p);
 						});
 
 						// update position
-						p.x += p.vx;
-						p.y += p.vy;
+						p.x += p.vx * ts;
+						p.y += p.vy * ts;
 
 						renderer.renderParticle(p);
 					}
@@ -209,8 +209,8 @@ ParticleJS.Emitter2D.Point = function(options) {
 		//t = Math.min(1, Math.max(0, t));
 
 		var a = me.sizeOverLife,
-			l = a.length,
-			i = (l * t + 0.5)|0;
+			l = a.length - 1,
+			i = (l * t)|0;
 
 		return a[i] || 0;
 	}
@@ -218,8 +218,8 @@ ParticleJS.Emitter2D.Point = function(options) {
 	function getOpacityOverLife(t) {
 
 		var a = me.opacityOverLife,
-			l = a.length,
-			i = (l * t + 0.5)|0;
+			l = a.length - 1,
+			i = (l * t)|0;
 
 		//if (i < 0) i = 0;
 
@@ -229,8 +229,8 @@ ParticleJS.Emitter2D.Point = function(options) {
 	function getFeatherOverLife(t) {
 
 		var a = me.featherOverLife,
-			l = a.length,
-			i = (l * t + 0.5)|0;
+			l = a.length - 1,
+			i = (l * t)|0;
 
 		return a[i] || 1;
 	}
@@ -250,10 +250,15 @@ ParticleJS.Emitter2D.Point = function(options) {
 	 Methods
 	 */
 
-	this.addPhysics = function(phys) {
+	this.addPhysics = function(phys, callback) {
 		if (phys.apply) {
 			physics.push(phys);
-			phys.init(w, h);
+
+			phys.init({
+				width: w,
+				height: h,
+				callback: callback
+			});
 		}
 		return this;
 	};

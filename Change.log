@@ -1,20 +1,42 @@
 Change log for ParticleJS
 -------------------------
 
+0.1.4 ALPHA
+
+ADD: Added 3D version of SimplexNoise (Perlin noise) for animation. Will
+     replace 2D version (patent issues with 3D impl. being checked).
+ADD: Vortex physics plugin. Supports suction/repulsion, gradient radial
+     force. Chain several to create multiple vortex fields.
+CHG: Vortex replaces magnet (set suction to 1.0)
+CHG: Initialization of physics plugins is now asynchronous. Callback is
+     optional though and is only needed where the plugin itself require
+     asynchronous setup (ie. webworkers etc.). Will let this live a
+     while and see if need changes.
+CHG: Centralized time-compensation value so it's only calculated once.
+     Each physics plugin now calculates wo/ needing to know the comp.
+CHG: Physics plugin's init() now gets an object passed in instead of
+     width and height parameters.
+CHG: Optimized and fixed a bug in the 3D SimplexNoise implementation.
+CHG: Conceptual change for feather. Is now percentage of max possible feather.
+
 0.1.3 ALPHA
 
-ADD: Preliminary grid based turbulence physics with custom resolution (perlin noise implemented, todo: vortex)
-CHG: Physics is changed to separate plugins. Each physic model is created separately (wind, magnet, gravity etc.)
-     and added to emitter via addPhysics in the order needed. Each physics plugin has its own methods for
-     adjustments. This adds major flexibility with very little additional performance cost.
+ADD: Preliminary grid based turbulence physics with custom resolution
+     (SimplexNoise (Perlin based noise) implemented)
+CHG: Physics is changed to separate plugins. Each physic model is
+     created separately (wind, magnet, gravity etc.) and added to
+     emitter via addPhysics in the order needed. Each physics plugin has
+     its own methods for adjustments. This adds major flexibility with
+     very little additional performance cost.
 
 
 0.1.2 ALPHA
 
 IMP: performance improvements
-CHG: emitter must be created manually, then added using same method as before
-ADD: Magnet force (initial behavior, will most likely morph into a different effect
-     and replaced with a more realistic behavior).
+CHG: emitter must be created manually, then added using same method as
+     before
+ADD: Magnet force (initial behavior, will most likely morph into a
+     different effect and replaced with a more realistic behavior).
 ADD: translate() to emitter to move emitter and all particles incl. old
      (as moving emitter alone won't affect old particles).
 

@@ -10,14 +10,15 @@ ParticleJS.Physics2D.Wind = function(wx, wy, ar) {
 
 	var	w, h;
 
-	this.init = function(width, height) {
-		w = width;
-		h = height;
+	this.init = function(e) {
+		w = e.width;
+		h = e.height;
+		if (e.callback) e.callback(true);
 	};
 
-	this.apply = function(p, ts) {
-		p.x += wx * ts;
-		p.y += wy * ts;
+	this.apply = function(p) {
+		p.x += wx;
+		p.y += wy;
 	};
 
 	this.setX = function(x) {
