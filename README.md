@@ -29,6 +29,9 @@ The engine is for real-time use, but still very early work in progress.
 as smooth as possible animation.
 - Render engine supports pre-, post- and update render calls per emitter for renderer (this allow you to share drawing surface).
 - Automatic clean-up of dead particles and particle arrays
+- Z-order toggle (newest or oldest first)
+- Global force parameter
+- Animated turbulence
 
 **In progress / evaluated:**
 

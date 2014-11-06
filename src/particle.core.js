@@ -1,5 +1,5 @@
 /*!
- *	ParticleJS version 0.1.5 ALPHA
+ *	ParticleJS version 0.1.6 ALPHA
  *	MIT license - include header
  *
  *	By Epistemex (c) 2014
