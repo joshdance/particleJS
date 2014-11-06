@@ -19,7 +19,7 @@ ParticleJS.Gradient.prototype.addStop = function(pos, color) {
 	return this;
 };
 
-ParticleJS.Gradient.prototype.generateNew = function() {
+ParticleJS.Gradient.prototype.generate = function() {
 
 	var w = this.width,
 		canvas = document.createElement('canvas'),

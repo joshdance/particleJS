@@ -23,12 +23,17 @@ ParticleJS.Physics2D.Gravity = function(gx, gy) {
 		p.vy += gy;
 	};
 
-	this.setX = function(x) {
+	this.updateFrame = function(e) {
+	};
+
+	this.gravityX = function(x) {
+		if (!arguments.length) return gx;
 		gx = x;
 		return this;
 	};
 
-	this.setY = function(y) {
+	this.gravityY = function(y) {
+		if (!arguments.length) return gy;
 		gy = y;
 		return this;
 	};

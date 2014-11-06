@@ -37,6 +37,7 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 		isInited = true;
 
 		calcGrid();
+
 		if (e.callback) e.callback(true);
 	};
 
@@ -45,12 +46,15 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 		if (force && radius) {
 
 			var map = getCell(p.x, p.y),
-				a = map.a,
-				f = map.f;
+				a = map.angle,
+				f = map.force;	// radial gradient force
 
-			p.vx += force * Math.cos(a) * f;
-			p.vy += force * Math.sin(a) * f;
+			p.vx += force * f * Math.cos(a);
+			p.vy += force * f * Math.sin(a);
 		}
+	};
+
+	this.updateFrame = function(e) {
 	};
 
 	function getCell(x, y) {
@@ -60,8 +64,8 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 			gi = iy * cellsY + ix;
 
 		return {
-			a: tMap[gi],
-			f: fMap[gi]
+			angle: tMap[gi],
+			force: fMap[gi]
 		};
 	}
 
@@ -76,10 +80,12 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 
 		// reset all to 0
 		tMap = new Float32Array(cellsX * cellsY);
+		tMapS = new Float32Array(cellsX * cellsY);
 		fMap = new Float32Array(cellsX * cellsY);
 
 		for(y = 0; y < cellsY; y++) {
 			for(x = 0; x < cellsX; x++) {
+
 				var gx = x * cellWidth,
 					gy = y * cellHeight,
 					v = getAngleDist(gx, gy, cx, cy),
@@ -200,14 +206,14 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 		return this;
 	};
 
-	this.generateNew = function() {
+	this.generate = function() {
 		calcGrid();
 		return this;
 	};
 
-	this.getMap = function() {
+	this.getMapImage = function() {
 
-		return ParticleJS.Physics2D.Turbulence.Tools.getMap(
+		return ParticleJS.Physics2D.Turbulence.Tools.getMapImage(
 			w, h,
 			cellsX, cellsY, cellWidth, cellHeight,
 			tMap, fMap,

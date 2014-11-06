@@ -2,7 +2,7 @@
 	Tools for turbulence physics plugins
  */
 
-ParticleJS.Physics2D.Turbulence.Tools.getMap = function(w, h, cellsX, cellsY, cellWidth, cellHeight, tMap, fMap, color) {
+ParticleJS.Physics2D.Turbulence.Tools.getMapImage = function(w, h, cellsX, cellsY, cellWidth, cellHeight, tMap, fMap, color) {
 
 	var canvas = document.createElement('canvas'),
 		ctx = canvas.getContext('2d'),

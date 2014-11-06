@@ -37,7 +37,12 @@ ParticleJS.Scene = function(options) {
 	};
 
 	this.addEmitter = function(emitter) {
-		emitter.init(width, height);
+
+		emitter.init({
+			width: width,
+			height: height
+		});
+
 		this.emitters.push(emitter);
 		return this;
 	};
@@ -65,7 +70,7 @@ ParticleJS.Scene = function(options) {
 		for(var i = 0, e; e = this.emitters[i++];) {
 			var num = ((e.birthRate() * ts) / diff + 0.5)|0;
 			e.generateParticles(time, num);
-			e.renderParticles(time, ts, diff);
+			e.renderParticles(time, ts);
 			e.cleanupParticles(time);
 		}
 

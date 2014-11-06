@@ -1,15 +1,15 @@
 
 // setup, render, destroy
 
-ParticleJS.Render.Canvas2D = function(canvas, options) {
+ParticleJS.Shader2D.Canvas = function(canvas, options) {
 
 	options = options || {};
 
 	var ctx,
 		w,
 		h,
-		cacheSize = 50,
-		cacheSizeH = cacheSize * 0.5,
+		spriteSize = 50,
+		spriteHalfSize = spriteSize * 0.5,
 		clearOpacity = options.clearOpacity || 1,
 		scnt = 30,
 		sstep = 1 / scnt,
@@ -21,21 +21,19 @@ ParticleJS.Render.Canvas2D = function(canvas, options) {
 		cs = sprite.getContext('2d'),
 		csHalf = spriteHalf.getContext('2d');
 
-	this.init = function(width, height) {
-		ctx = canvas.getContext('2d');
-		w = canvas.width = width;
-		h = canvas.height = height;
-	};
+	this.init = function(e) {
 
-	this.setup = function(width, height, options) {
-
-		var	hasGradient = (options.gradient !== null),
+		var	hasGradient = (e.gradient !== null),
 			i = 0,
 			featherR,
 			szF;
 
-		sprite.width = cacheSize * scnt;
-		sprite.height = hasGradient ? cacheSize * ccnt : cacheSize;
+		w = canvas.width = e.width;
+		h = canvas.height = e.height;
+		ctx = canvas.getContext('2d');
+
+		sprite.width = spriteSize * scnt;
+		sprite.height = hasGradient ? spriteSize * ccnt : spriteSize;
 
 		if (!hasGradient) ccnt = 0;
 
@@ -44,16 +42,16 @@ ParticleJS.Render.Canvas2D = function(canvas, options) {
 
 		cs.save();
 
-		cs.shadowColor = hasGradient ? "#fff" : 'rgb(' + options.r + ',' + options.g + ',' + options.b + ')';
+		cs.shadowColor = hasGradient ? "#fff" : 'rgb(' + e.r + ',' + e.g + ',' + e.b + ')';
 
 		for(; i < scnt; i++) {
 
-			featherR = cacheSizeH * i * sstep * 0.67;
-			szF = cacheSizeH - featherR;
+			featherR = spriteHalfSize * i * sstep * 0.67;
+			szF = spriteHalfSize - featherR;
 
 			cs.beginPath();
-			cs.arc(-cacheSizeH, cacheSizeH, szF, 0, 2*Math.PI);
-			cs.shadowOffsetX = cacheSize * (i + 1);
+			cs.arc(-spriteHalfSize, spriteHalfSize, szF, 0, 2*Math.PI);
+			cs.shadowOffsetX = spriteSize * (i + 1);
 			cs.shadowBlur = featherR;
 			cs.fill();
 		}
@@ -62,7 +60,7 @@ ParticleJS.Render.Canvas2D = function(canvas, options) {
 
 		if (hasGradient) {
 
-			for(i = cacheSize; i < sprite.height; i *= 2) {
+			for(i = spriteSize; i < sprite.height; i *= 2) {
 				cs.drawImage(sprite, 0, 0, sprite.width, i, 0, i, sprite.width, i);
 			}
 
@@ -71,7 +69,7 @@ ParticleJS.Render.Canvas2D = function(canvas, options) {
 			for(i = 0; i < ccnt; i++) {
 				var c = gradient.getColor(i / ccnt);
 				cs.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-				cs.fillRect(0, i * cacheSize, sprite.width, cacheSize);
+				cs.fillRect(0, i * spriteSize, sprite.width, spriteSize);
 			}
 		}
 
@@ -84,40 +82,40 @@ ParticleJS.Render.Canvas2D = function(canvas, options) {
 		else if (typeof ctx.webkitImageSmoothingEnabled !== 'undefined') ctx.webkitImageSmoothingEnabled = false;
 
 		ctx.fillStyle = 'rgba(0,0,0,' + clearOpacity + ')';
+
+		e.callback(true);
 	};
 
 	this.preRender = function() {
-		if (clearOpacity < 1) {
-			ctx.fillRect(0, 0, w, h);
-		}
-		else {
-			ctx.clearRect(0, 0, w, h);
-		}
+		clearOpacity === 1 ? ctx.clearRect(0, 0, w, h) : ctx.fillRect(0, 0, w, h);
 	};
 
 	this.renderParticle = function(p) {
 
-		if (p.size < 1) return;
-
 		var fi = (scnt1 * p.feather)|0,		// feather index
-			sx = fi * cacheSize,
+			sx = fi * spriteSize,
 			ci = (ccnt1 * p.lifeIndex)|0,	// color index
-			sy = ci * cacheSize;
+			sy = ci * spriteSize;
 
 		ctx.globalAlpha = p.opacity;
 
-		if (p.size > cacheSizeH) {
-			ctx.drawImage(sprite, sx, sy, cacheSize, cacheSize,
+		if (p.size > spriteHalfSize) {
+			ctx.drawImage(sprite, sx, sy, spriteSize, spriteSize,
 				p.x - p.sizeR, p.y - p.sizeR, p.size, p.size);
 		}
 		else {
-			ctx.drawImage(spriteHalf, sx>>1, sy>>1, cacheSizeH, cacheSizeH,
+			ctx.drawImage(spriteHalf, sx>>1, sy>>1, spriteHalfSize, spriteHalfSize,
 				p.x - p.sizeR, p.y - p.sizeR, p.size, p.size);
 		}
 
 	};
 
-	this.postRender = function() {
+	this.postRender = function(e) {
+		var fs = ctx.fillStyle;
+		ctx.fillStyle = '#fff';
+		ctx.globalAlpha = 1;
+		ctx.fillText(e.count, 10, 10);
+		ctx.fillStyle = fs;
 	};
 
 	// methods for this renderer

@@ -1,6 +1,22 @@
 Change log for ParticleJS
 -------------------------
 
+0.1.5 ALPHA
+
+ADD: Enable reverse z-order for rendering
+ADD: New globalForce method on emitter affecting the end velocity
+ADD: Z-depth animate-able turbulence with jitter-array
+ADD: methods to turbulence plugins
+CHG: wind plugin rewritten to support map for wave effect
+CHG: vortex plugin now caches angle maps
+CHG: renaming renderer -> shader
+CHG: emitter.setShader() (was: setRenderer()) is now async capable
+CHG: merging init() and setup() for shader -> init() only (internal)
+CHG: feather value uses normalized values [0.0, 1.0] instead of %
+CHG: variation values uses normalized values [0.0, 1.0] instead of %
+CHG: Turbulence tools and plugins: getMap() -> getMapImage().
+FIX: misc. optimizations and fixes
+
 0.1.4 ALPHA
 
 ADD: Added 3D version of SimplexNoise (Perlin noise) for animation. Will
@@ -10,7 +26,7 @@ ADD: Vortex physics plugin. Supports suction/repulsion, gradient radial
 CHG: Vortex replaces magnet (set suction to 1.0)
 CHG: Initialization of physics plugins is now asynchronous. Callback is
      optional though and is only needed where the plugin itself require
-     asynchronous setup (ie. webworkers etc.). Will let this live a
+     asynchronous setup (ie. web workers etc.). Will let this live a
      while and see if need changes.
 CHG: Centralized time-compensation value so it's only calculated once.
      Each physics plugin now calculates wo/ needing to know the comp.
@@ -18,6 +34,7 @@ CHG: Physics plugin's init() now gets an object passed in instead of
      width and height parameters.
 CHG: Optimized and fixed a bug in the 3D SimplexNoise implementation.
 CHG: Conceptual change for feather. Is now percentage of max possible feather.
+
 
 0.1.3 ALPHA
 

@@ -9,18 +9,31 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 	force = (typeof force === 'number') ? force : 0.05;
 
 	var isInited = false,
+
 		w, h,
 		cellWidth,
 		cellHeight,
-		extension = 1,
-		tMap = new Float32Array(cellsX * cellsY * extension),
-		fMap = new Float32Array(cellsX * cellsY * extension),
+
+		slices = 20,				// z-depth for animated variations
+		slice = 0,
+		sliceFrames = 5,
+		sliceFrameDlt = 1,
+		sliceCurrentFrame = 0,
+
+		jitter,						// jitter array
+		jitterInt = 10,				// indexes to interpolate over
+		jitterCount = 50,			// number of jitter keys
+
+		tMaps = new Array(slices),
+		fMaps = new Array(slices),
+		ctMap,						// current t map
+		cfMap,
 
 		aOctaves = 2,
 		fOctaves = 4,
-		sVariation = 0.5,	// speed (z over time)
-		dVariation = 0.1,	// offset direction
-		fVariation = 0.8;	// force
+		//sVariation = 0.5,			// speed (z over time)
+		dVariation = 0.1,			// offset direction
+		fVariation = 0.8;			// force
 
 	this.init = function(e) {
 
@@ -31,7 +44,7 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 
 		isInited = true;
 
-		calcGrid();
+		calcCube();
 
 		if (e.callback) e.callback(true);
 	};
@@ -49,6 +62,29 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 		}
 	};
 
+	this.updateFrame = function(e) {
+
+		if (isInited && force && e.count) {
+
+			sliceCurrentFrame++;
+
+			if (sliceCurrentFrame === sliceFrames) {
+				sliceCurrentFrame = 0;
+
+				slice++;
+
+				if (slice === jitter.length) {
+					slice = 0;
+					calcJitterArray();
+				}
+
+				ctMap = tMaps[jitter[slice]];
+				cfMap = fMaps[jitter[slice]];
+			}
+		}
+
+	};
+
 	function getCell(x, y) {
 
 		var ix = (x / cellWidth )|0,
@@ -56,8 +92,8 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 			gi = iy * cellsY + ix;
 
 		return {
-			a: tMap[gi],
-			f: fMap[gi]
+			a: ctMap[gi],
+			f: cfMap[gi]
 		};
 	}
 
@@ -66,55 +102,160 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 	}
 
 	// Generates one map for direction and one for force, which are used in combination
-	function calcGrid() {
+	function calcCube() {
 
 		if (!isInited) return;
 
 		var	x,
 			y,
+			z,
+			n,
 			pi = Math.PI * 2,
 			ro = pi * Math.random() - Math.PI,	// random offset for all
-			mx = cellsX * extension,			// max x/y incl. extension
-			my = cellsY * extension,
-			turbulence;
+			mx = cellsX,						// max x/y incl. extension
+			my = cellsY,
+			tAngle = new ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise(),
+			tForce = new ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise();
 
-		turbulence = new ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise();
+		// generate 3D slices/cube
+		for(z = 0; z < slices; z++) {
 
-		for(y = 0; y < my; y++) {
-			for(x = 0; x < mx; x++) {
-				tMap[getCellIndex(x, y)] = turbulence.noise3D((x / mx) * aOctaves, (y / my) * aOctaves, 0) * pi + ro + pi * dVariation * Math.random();
+			// new slice for z
+			var tMap = new Float32Array(cellsX * cellsY),
+				aDepth = (z / slices) * aOctaves;
+
+			for(y = 0; y < my; y++) {
+				for(x = 0; x < mx; x++) {
+					n = tAngle.noise3D((x / mx) * aOctaves, (y / my) * aOctaves, aDepth);
+					tMap[getCellIndex(x, y)] = n * pi + ro + pi * dVariation * Math.random();
+				}
 			}
+
+			tMaps[z] = tMap;
 		}
 
-		turbulence = new ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise();
+		for(z = 0; z < slices; z++) {
 
-		for(y = 0; y < my; y++) {
-			for(x = 0; x < mx; x++) {
-				var n = turbulence.noise3D(x / mx * fOctaves, y / my * fOctaves, 0);
-				fMap[getCellIndex(x, y)] = minMax(1 - (n * fVariation));
+			// new slice for z
+			var fMap = new Float32Array(cellsX * cellsY),
+				fDepth = (z / slices) * aOctaves;
+
+			for(y = 0; y < my; y++) {
+				for(x = 0; x < mx; x++) {
+					n = tForce.noise3D(x / mx * fOctaves, y / my * fOctaves, fDepth);
+					fMap[getCellIndex(x, y)] = minMax(1 - (n * fVariation));
+				}
 			}
+
+			fMaps[z] = fMap;
 		}
+
+		slice = 0;
+		ctMap = tMaps[0];
+		cfMap = fMaps[0];
+
+		calcJitterArray();
 
 		function minMax(v) {
 			return Math.max(0, Math.min(1, v));
 		}
 	}
 
+	function calcJitterArray() {
+
+		var total = (jitterCount + 1) * jitterInt - 1,
+			cnt = jitterCount * jitterInt,
+			from = -1,
+			to = 0,
+			i = 0;
+
+		jitter = new Uint8Array(total);
+
+		for(; i < cnt; i++) {
+			if (i % jitterInt === 0) {
+				if (from < 0) {
+					from = (Math.random() * slices)|0;
+					to = (Math.random() * slices)|0;
+				}
+				else {
+					from = to;
+					to = (Math.random() * slices)|0;
+				}
+			}
+			jitter[i] = int(from, to, (i % jitterInt) / jitterInt);
+		}
+
+		// make last part loop-able
+		from = to;
+		to = jitter[0];
+
+		for(; i < total; i++)
+			jitter[i] = int(from, to, (i % jitterInt) / jitterInt);
+
+		function int(a, b, t) {
+			return a + (b - a) * t;
+		}
+	}
 
 	this.force = function(f) {
+
+		if (!arguments.length) return force;
+
 		force = f;
 		return this;
 	};
 
-	this.generateNew = function() {
-		calcGrid();
+	this.forceVariation = function(fv) {
+
+		if (!arguments.length) return fVariation;
+
+		fVariation = fv;
+		calcCube();
+
+		return this;
 	};
 
-	this.getMap = function() {
-		return ParticleJS.Physics2D.Turbulence.Tools.getMap(
+	this.offsetVariation = function(ov) {
+
+		if (!arguments.length) return dVariation;
+
+		dVariation = ov;
+		calcCube();
+
+		return this;
+	};
+
+	this.octavesAngleMap = function(o) {
+
+		if (!arguments.length) return aOctaves;
+
+		aOctaves = o|0;
+		calcCube();
+
+		return this;
+	};
+
+	this.octavesForceMap = function(o) {
+
+		if (!arguments.length) return fOctaves;
+
+		fOctaves = o|0;
+		calcCube();
+
+		return this;
+	};
+
+
+	this.generate = function() {
+		calcCube();
+		return this;
+	};
+
+	this.getMapImage = function() {
+		return ParticleJS.Physics2D.Turbulence.Tools.getMapImage(
 			w, h,
 			cellsX, cellsY, cellWidth, cellHeight,
-			tMap, fMap,
+			ctMap, cfMap,
 			'rgba(90, 90, 255, 0.5)'
 		);
 	};

@@ -8,12 +8,12 @@
 <body>
 
 	<div id="container">
-		<header>
-			<h1>ParticleJS</h1>
-		</header>
 
 		<div id="main">
-			<canvas id="canvas" width="512" height="256"></canvas>
+			<div class="main">
+				<h1>ParticleJS</h1>
+				<canvas id="canvas" width="512" height="256"></canvas>
+			</div>
 
 			<div class="options">
 				<div>
@@ -43,12 +43,12 @@
 				<div>
 					<label for="rngFeather">Feather</label>
 					<input id="rngFeather" type="range" min="0" max="100" value="50">
-					<output id="outFeather">50</output>
+					<output id="outFeather">0.50</output>
 				</div>
 
 				<div>
 					<label for="rngOpacity">Opacity</label>
-					<input id="rngOpacity" type="range" min="0" max="1000" value="20">
+					<input id="rngOpacity" type="range" min="0" max="255" value="6">
 					<output id="outOpacity">0.02</output>
 				</div>
 
@@ -67,15 +67,15 @@
 				<hr>
 
 				<div>
-					<label for="rngWindX">Wind X</label>
-					<input id="rngWindX" type="range" min="-50" max="50" value="0">
-					<output id="outWindX">0</output>
+					<label for="rngWindA">Wind angle</label>
+					<input id="rngWindA" type="range" min="0" max="360" value="0">
+					<output id="outWindA">0</output>
 				</div>
 
 				<div>
-					<label for="rngWindY">Wind Y</label>
-					<input id="rngWindY" type="range" min="-30" max="30" value="0">
-					<output id="outWindY">0</output>
+					<label for="rngWindF">Wind force</label>
+					<input id="rngWindF" type="range" min="0" max="100" value="0">
+					<output id="outWindF">0.00</output>
 				</div>
 
 				<div>
@@ -119,6 +119,14 @@
 				<hr>
 
 				<div>
+					<label for="rngGlobal">Global force</label>
+					<input id="rngGlobal" type="range" min="0" max="200" value="100">
+					<output id="outGlobal">1.00</output>
+				</div>
+
+				<hr>
+
+				<div>
 					<input id="chkShoot" type="checkbox">
 					<label for="chkShoot">Click to spray</label>
 				</div>
@@ -126,6 +134,11 @@
 				<div>
 					<input id="chkLock" type="checkbox">
 					<label for="chkLock">Click to lock</label>
+				</div>
+
+				<div>
+					<input id="chkReverse" type="checkbox">
+					<label for="chkReverse" style="width:160px">Reverse Z-order</label>
 				</div>
 
 				<div>
@@ -153,7 +166,7 @@
 <script src="../src/particle.physics2D.turbulence.tools.js"></script>
 <script src="../src/particle.physics2D.turbulence.noise.js"></script>
 <script src="../src/particle.physics2D.turbulence.vortex.js"></script>
-<script src="../src/particle.render.canvas2D.js"></script>
+<script src="../src/particle.shader2D.canvas.js"></script>
 <script src="../src/particle.gradient.js"></script>
 
 <script>
@@ -161,7 +174,7 @@
 	// create scene
 	var scene,
 	    emitter,
-	    renderer,
+	    shader,
 	    gradient,
 
 	    gravity,
@@ -170,6 +183,7 @@
 	    turb,
 	    vortex1,
 	    vortex2,
+	    globalForce,
 
 		canvas = document.getElementById('canvas'),
 		tmap = null,
@@ -203,7 +217,7 @@
 			.addStop(1   , '#111');
 
 	// create canvas renderer instance
-	renderer = new ParticleJS.Render.Canvas2D(canvas, {
+	shader = new ParticleJS.Shader2D.Canvas(canvas, {
 		clearOpacity: 1
 	});
 
@@ -211,15 +225,15 @@
 	emitter = new ParticleJS.Emitter2D.Point({
 		birthRate     : brate,      // particles per frame
 		velocity      : 300,        // speed each particle is thrown at its direction
-		randomVelocity: 60,         // variation in % between full and full - %
+		randomVelocity: 0.6,        // random variation of full velocity
 		life          : 3,          // life in seconds
 		spread        : 360,        // angle of spread
 		spreadAngle   : 0,          // if spread is not 360, angle offset to spread from
 		x             : 400,        // emitter center
 		y             : 200,
 		size          : 100,        // global (max) diameter in pixels of each particle
-		randomSize    : 60,         // size variation in %
-		feather       : 50,         // feather in %
+		randomSize    : 0.6,        // size variations
+		feather       : 0.5,        // feather (normalized)
 		randomFeather : 0,
 		gradient      : gradient,   // optional gradient (overrides color below)
 		r             : 150,        // base color
@@ -227,20 +241,23 @@
 		b             : 250,
 		opacity       : 0.16,       // global opacity, overridden by variation and ramp (opacity over life)
 		randomOpacity : 0,
-		renderer      : renderer,   // use this renderer (mandatory)
-		preRender     : true        // call pre-render (clears canvas)
+		shader        : shader,   // use this shader (mandatory)
+		preRender     : true,        // call pre-render (clears canvas)
+		postRender    : true
 	});
 
 	// add emitter to scene
 	scene.addEmitter(emitter);
 
+	emitter.globalForce(0.5);
+
 	// create the physics models we want to use
-	gravity = new ParticleJS.Physics2D.Gravity(0, 0);
-	wind    = new ParticleJS.Physics2D.Wind(0, 0);
-	magnet  = new ParticleJS.Physics2D.Turbulence.Vortex(400, 300, 100, 32, 32, 0).suction(1); // set max suction and it becomes a magnet
-	turb    = new ParticleJS.Physics2D.Turbulence.Noise(32, 24, 0);
-	vortex1 = new ParticleJS.Physics2D.Turbulence.Vortex(300, 200, 200, 32, 32, 0);
-	vortex2 = new ParticleJS.Physics2D.Turbulence.Vortex(600, 320, 120, 32, 32, 0);
+	gravity     = new ParticleJS.Physics2D.Gravity(0, 0);
+	wind        = new ParticleJS.Physics2D.Wind(0, 0);
+	magnet      = new ParticleJS.Physics2D.Turbulence.Vortex(400, 300, 100, 32, 32, 0).suction(1); // set max suction and it becomes a magnet
+	turb        = new ParticleJS.Physics2D.Turbulence.Noise(32, 24, 0);
+	vortex1     = new ParticleJS.Physics2D.Turbulence.Vortex(300, 200, 200, 32, 32, 0);
+	vortex2     = new ParticleJS.Physics2D.Turbulence.Vortex(600, 320, 120, 32, 32, 0);
 
 	// add the physics models in the order we want
 	emitter.addPhysics(turb);
@@ -250,8 +267,8 @@
 	emitter.addPhysics(gravity);
 	emitter.addPhysics(wind);
 
-	//document.body.appendChild(vortex1.getMap());
-	//document.body.appendChild(vortex2.getMap());
+	//document.body.appendChild(vortex1.getMapImage());
+	//document.body.appendChild(vortex2.getMapImage());
 
 	// optional over-life arrays
 	emitter.sizeOverLife = new Float32Array([0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.7, 0.5]);
@@ -304,15 +321,15 @@
 	});
 
 	addEv('rngOpacity', 'change', function() {
-		var v = this.value * 0.001;
+		var v = this.value / 255;
 		emitter.opacity(v);
-		document.getElementById('outOpacity').innerHTML = v.toFixed(3);
+		document.getElementById('outOpacity').innerHTML = v.toFixed(2);
 	});
 
 	addEv('rngFeather', 'change', function() {
-		var v = this.value;
+		var v = this.value * 0.01;
 		emitter.feather(v);
-		document.getElementById('outFeather').innerHTML = v;
+		document.getElementById('outFeather').innerHTML = v.toFixed(2);
 	});
 
 	addEv('rngSpread', 'change', function() {
@@ -327,21 +344,21 @@
 		document.getElementById('outSpreadA').innerHTML = v;
 	});
 
-	addEv('rngWindX', 'change', function() {
-		var v = this.value * 0.1;
-		wind.setX(v);
-		document.getElementById('outWindX').innerHTML = v.toFixed(1);
+	addEv('rngWindA', 'change', function() {
+		var v = this.value;
+		wind.windAngle(v);
+		document.getElementById('outWindA').innerHTML = v;
 	});
 
-	addEv('rngWindY', 'change', function() {
-		var v = this.value * 0.1;
-		wind.setY(v);
-		document.getElementById('outWindY').innerHTML = v.toFixed(1);
+	addEv('rngWindF', 'change', function() {
+		var v = this.value * 0.01;
+		wind.windForce(v);
+		document.getElementById('outWindF').innerHTML = v.toFixed(2);
 	});
 
 	addEv('rngGravY', 'change', function() {
 		var v = this.value * 0.01;
-		gravity.setY(v);
+		gravity.gravityY(v);
 		document.getElementById('outGravY').innerHTML = v.toFixed(2);
 	});
 
@@ -375,13 +392,23 @@
 		document.getElementById('outVortex2').innerHTML = v.toFixed(2);
 	});
 
+	addEv('rngGlobal', 'change', function() {
+		var v = this.value * 0.01;
+		emitter.globalForce(+v);
+		document.getElementById('outGlobal').innerHTML = v.toFixed(2);
+	});
+
 	addEv('chkLock', 'change', function() {
 		lock = !!this.checked;
 	});
 
+	addEv('chkReverse', 'change', function() {
+		emitter.reverseZ(!!this.checked);
+	});
+
 	addEv('chkMap', 'change', function() {
 		if (this.checked) {
-			canvas.style.background = 'url(' + turb.getMap().toDataURL() + ')';
+			canvas.style.background = 'url(' + turb.getMapImage().toDataURL() + ')';
 		}
 		else {
 			canvas.style.background = '#000';
@@ -402,9 +429,9 @@
 	});
 
 	addEv('btnNewTurb', 'click', function() {
-		turb.generateNew();
+		turb.generate();
 		if (chkMap.checked) {
-			canvas.style.background = 'url(' + turb.getMap().toDataURL() + ')';
+			canvas.style.background = 'url(' + turb.getMapImage().toDataURL() + ')';
 		}
 	});
 
@@ -438,6 +465,8 @@
 
 		emitter.x = mx;
 		emitter.y = my;
+
+		//canvas.style.background = 'url(' + turb.getMapImage().toDataURL() + ')';
 
 		//cnt++;
 		//if (cnt < 2000)
