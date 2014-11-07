@@ -2,11 +2,10 @@
 	Physics plugin for wind
  */
 
-ParticleJS.Physics2D.Wind = function(angle, force, airRest, cellsX, cellsY) {
+ParticleJS.Physics2D.Wind = function(angle, force, cellsX, cellsY) {
 
 	angle = (typeof angle === 'number') ? angle : 0;
 	force = (typeof force === 'number') ? force: 0;
-	airRest = airRest || 0;
 	cellsX = cellsX || 32;
 	cellsY = cellsY || 32;
 

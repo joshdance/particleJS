@@ -2,7 +2,7 @@
 	Physics plugin for magnet (aka. attractor / repeller / jet)
  */
 
-ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY, force) {
+ParticleJS.Physics2D.Vortex = function(cx, cy, radius, cellsX, cellsY, force) {
 
 	cx = cx||0;
 	cy = cy||0;
@@ -12,11 +12,7 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 	force = (typeof force === 'number') ? force : 0.5;
 
 	var isInited = false,
-		w, h,
-		cellWidth,
-		cellHeight,
-		tMap = new Float32Array(cellsX * cellsY),
-		fMap = new Float32Array(cellsX * cellsY),
+		grid,
 
 		suction	= 0.75,		// suction towards center, 0=none, 1 = 90deg, -1 = -90deg
 		aVariation = 1,		// angle
@@ -29,10 +25,7 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 
 	this.init = function(e) {
 
-		w = e.width;
-		h = e.height;
-		cellWidth = w / cellsX;
-		cellHeight = h / cellsY;
+		grid = new ParticleJS.Tools.GridObject(e.width, e.height, cellsX, cellsY);
 
 		isInited = true;
 
@@ -43,11 +36,11 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 
 	this.apply = function(p) {
 
-		if (force && radius) {
+		if (isInited && force && radius) {
 
-			var map = getCell(p.x, p.y),
-				a = map.angle,
-				f = map.force;	// radial gradient force
+			var v = grid.getCell(p.x, p.y),
+				a = v.angle,
+				f = v.force;	// radial gradient force
 
 			p.vx += force * f * Math.cos(a);
 			p.vy += force * f * Math.sin(a);
@@ -57,58 +50,27 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 	this.updateFrame = function(e) {
 	};
 
-	function getCell(x, y) {
-
-		var ix = (x / cellWidth )|0,
-			iy = (y / cellHeight)|0,
-			gi = iy * cellsY + ix;
-
-		return {
-			angle: tMap[gi],
-			force: fMap[gi]
-		};
-	}
-
 	function calcGrid() {
 
 		if (!isInited) return;
 
-		var	x, y,
-			r2 = radius * radius,
-			tangent = 0.25 * direction * Math.PI * 2,
-			suck = -tangent * suction;
+		var	r2 = radius * radius,
+			   tangent = 0.25 * direction * Math.PI * 2,
+			   suck = -tangent * suction;
 
 		// reset all to 0
-		tMap = new Float32Array(cellsX * cellsY);
-		tMapS = new Float32Array(cellsX * cellsY);
-		fMap = new Float32Array(cellsX * cellsY);
+		grid.clear();
 
-		for(y = 0; y < cellsY; y++) {
-			for(x = 0; x < cellsX; x++) {
+		grid.forEach(function(x, y) {
 
-				var gx = x * cellWidth,
-					gy = y * cellHeight,
-					v = getAngleDist(gx, gy, cx, cy),
-					ix;
+			var v = grid.getAngleDist(x, y, cx, cy);
 
-				if (v.dist <= r2) {
-					ix = getCellIndex(x, y);
-					tMap[ix] = v.angle + tangent + suck;
-					fMap[ix] = innerForce + (outerForce - innerForce) * (v.dist / r2);
-				}
+			if (v.dist <= r2) {
+				grid.setCellAtXY(x, y,
+					v.angle + tangent + suck,
+					innerForce + (outerForce - innerForce) * (v.dist / r2));
 			}
-		}
-
-		function getAngleDist(x0, y0, x1, y1) {
-
-			var dx = (x1-x0),
-				dy = (y1-y0);
-
-			return {
-				angle: Math.atan2(dy, dx),
-				dist : Math.abs(dx*dx + dy*dy)
-			}
-		}
+		});
 	}
 
 	function getCellIndex(x, y) {
@@ -213,7 +175,7 @@ ParticleJS.Physics2D.Turbulence.Vortex = function(cx, cy, radius, cellsX, cellsY
 
 	this.getMapImage = function() {
 
-		return ParticleJS.Physics2D.Turbulence.Tools.getMapImage(
+		return ParticleJS.Tools.getMapImage(
 			w, h,
 			cellsX, cellsY, cellWidth, cellHeight,
 			tMap, fMap,

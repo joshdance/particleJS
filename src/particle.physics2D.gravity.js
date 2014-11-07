@@ -7,6 +7,8 @@ ParticleJS.Physics2D.Gravity = function(gx, gy) {
 	gx = gx || 0;
 	gy = gy || 0;
 
+	this.airRest = 0;
+
 	var //isInited = false,
 		w, h;
 

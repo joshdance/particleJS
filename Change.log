@@ -1,6 +1,16 @@
 Change log for ParticleJS
 -------------------------
 
+0.1.6 ALPHA
+
+ADD: common map object for physics engine
+ADD: starting (slowly) jsdoc implementation
+ADD: random color support (over life with gradient)
+CHG: Vortex plugin uses new map object
+CHG: simplified namespace (turbulence.noise->turbulence, turbulence.vortex->vortex).
+CHG: moving air-resistance from wind -> gravity
+
+
 0.1.5 ALPHA
 
 ADD: Enable reverse z-order for rendering

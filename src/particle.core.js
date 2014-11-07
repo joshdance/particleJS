@@ -18,7 +18,14 @@
 	Test: custom forEach vs. various for loops
 	 http://jsperf.com/custom-foreach-vs-for-cached
 	 http://jsperf.com/for-vs-foreach/240
-	  -> using for-loop with cached length
+	  -> using for-loop with cached length (see new test below)
+
+	Test: for-loop with regular condition versus using setting directly as
+	conditions:
+	 http://jsperf.com/for-conditionals
+	  -> Interesting result. Ken style is faster on FF, setting directly
+	  on Chrome. Both are many times faster than using traditional cached
+	  length in this test....
 
 	Test: double length array vs. two single arrays (typed arrays):
 	 http://jsperf.com/double-array-vs-two-arrays
@@ -34,20 +41,23 @@
 	Test: Math.sin/cos directly vs. LUT pre-calculated values
 	 http://jsperf.com/math-sin-vs-lut
 	 -> ...use Math.* directly - just needed to be sure!
+
+	 Test: iterating 1D vs 2D arrays:
+	  http://jsperf.com/2d-vs-1d-array-iteration
+	   -> 2D was chosen for maintainability (partly deleting dead particles) but
+	    the difference may not be justifiable as 1d is about 8-10x faster..
+
  */
 
 "use strict";
 
 // public namespaces
 var ParticleJS = {
-	Physics2D: {
-		Turbulence: {
-			Tools: {}
-		}
-	},
+	Physics2D: {},
 	Shader2D: {},
 	Emitter2D: {},
-	Emitter3D: {}
+	Emitter3D: {},
+	Tools: {}
 };
 
 // this is faster than the built-in method

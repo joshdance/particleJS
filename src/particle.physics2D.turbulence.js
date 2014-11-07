@@ -2,7 +2,7 @@
 	Physics plugin for magnet (aka. attractor / repeller / jet)
  */
 
-ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
+ParticleJS.Physics2D.Turbulence = function(cellsX, cellsY, force) {
 
 	cellsX = cellsX||32;
 	cellsY = cellsY||32;
@@ -114,8 +114,8 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 			ro = pi * Math.random() - Math.PI,	// random offset for all
 			mx = cellsX,						// max x/y incl. extension
 			my = cellsY,
-			tAngle = new ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise(),
-			tForce = new ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise();
+			tAngle = new ParticleJS.Physics2D.Turbulence.SimplexNoise(),
+			tForce = new ParticleJS.Physics2D.Turbulence.SimplexNoise();
 
 		// generate 3D slices/cube
 		for(z = 0; z < slices; z++) {
@@ -252,7 +252,7 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 	};
 
 	this.getMapImage = function() {
-		return ParticleJS.Physics2D.Turbulence.Tools.getMapImage(
+		return ParticleJS.Tools.getMapImage(
 			w, h,
 			cellsX, cellsY, cellWidth, cellHeight,
 			ctMap, cfMap,
@@ -267,7 +267,7 @@ ParticleJS.Physics2D.Turbulence.Noise = function(cellsX, cellsY, force) {
 	Modified and optimized by Ken "Epistemex" Fyrstenberg, 2014.
 	For details refer to original paper.
  */
-ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise = function() {
+ParticleJS.Physics2D.Turbulence.SimplexNoise = function() {
 
 	this.perm 	= new Uint8Array(512);
 
@@ -281,7 +281,7 @@ ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise = function() {
 
 };
 
-ParticleJS.Physics2D.Turbulence.Noise.SimplexNoise.prototype.noise3D = function(xin, yin, zin) {
+ParticleJS.Physics2D.Turbulence.SimplexNoise.prototype.noise3D = function(xin, yin, zin) {
 
 	var n0, n1, n2, n3,
 		s = (xin + yin + zin) * 0.33333333333,

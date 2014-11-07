@@ -20,6 +20,7 @@ ParticleJS.Emitter2D.Point = function(options) {
 		size			= typeof options.size === 'number' ? options.size : 1,
 		life			= (typeof options.life === 'number' ? options.life : 3) * 1000,
 		feather			= (typeof options.feather === 'number' ? options.feather : 0.4),
+		maxParticles	= (typeof options.maxParticles === 'number' ? options.maxParticles : 32000),
 
 		rndVelocity		= (typeof options.randomVelocity === 'number' ? options.randomVelocity : 0),
 		rndOpacity		= (typeof options.randomOpacity === 'number' ? options.randomOpacity : 0),
@@ -34,6 +35,7 @@ ParticleJS.Emitter2D.Point = function(options) {
 		green			= typeof options.g === 'number' ? options.g : 255,
 		blue			= typeof options.b === 'number' ? options.b : 255,
 		gradient		= options.gradient ? options.gradient : null,
+		rndColor		= options.randomColor || false,
 
 		shader,
 		preRender		= options.preRender,
@@ -133,7 +135,7 @@ ParticleJS.Emitter2D.Point = function(options) {
 			return v - (spread * v * Math.random());
 		}
 
-		return parts.length;
+		//return parts.length;
 	};
 
 	this.renderParticles = function(time, ts) {
@@ -160,24 +162,24 @@ ParticleJS.Emitter2D.Point = function(options) {
 
 			var i = 0,
 				t,
-				l = particles.length,
+				part,
+				p,
 				em = me,
+				population,
 				factor = ts * globalForce;
 
 			// iterate to update, apply physics, render and clean up
 
 			if (reverseZ) {
 
-				i = l - 1;
+				i = particles.length - 1;
 
-				for(; i > -1; i--) {
+				for(; part = particles[i]; i--) {
 
-					var part = particles[i],
-						population = false,
-						pl = part.length;
+					population = false;
 
-					for(t = pl - 1; t > -1; t--) {
-						updateParticle(em, factor, part[t]);
+					for(t = part.length - 1; p = part[t]; t--) {
+						if (count < maxParticles) updateParticle(em, factor, p);
 					}
 
 					if (!population) particles[i] = [];
@@ -186,26 +188,22 @@ ParticleJS.Emitter2D.Point = function(options) {
 			}
 			else {
 
-				for(; i < l; i++) {
+				for(; part = particles[i]; i++) {
 
-					var part = particles[i],
-						population = false,
-						pl = part.length;
-
-					for(t = 0; t < pl; t++) {
-						updateParticle(em, factor, part[t]);
+					for(t = 0; p = part[t]; t++) {
+						if (count < maxParticles) updateParticle(em, factor, p);
 					}
 
 					if (!population) particles[i] = [];
 				}
 			}
 
-
 			function updateParticle(em, factor, p) {
 
 				p.updateLife(time);
 
 				if (p.isActive) {
+
 					population = true;
 					count++;
 
@@ -289,6 +287,7 @@ ParticleJS.Emitter2D.Point = function(options) {
 	this.addPhysics = function(phys, callback) {
 
 		if (phys.init && phys.apply) {
+
 			physics.push(phys);
 
 			phys.init({
@@ -315,6 +314,7 @@ ParticleJS.Emitter2D.Point = function(options) {
 				g       : green,
 				b       : blue,
 				gradient: gradient,
+				rndColor: rndColor,
 				callback: function(state) {
 					if (!state) throw "Fatal: Could not init renderer.";
 					if (callback) callback(true);
@@ -412,7 +412,6 @@ ParticleJS.Emitter2D.Point = function(options) {
 		return this;
 	};
 
-
 	this.translate = function(dx, dy) {
 
 		// iterate to update, apply physics, render and clean up
@@ -422,8 +421,8 @@ ParticleJS.Emitter2D.Point = function(options) {
 					p.x += dx;
 					p.y += dy;
 				}
-			} // t
-		}	// i
+			}
+		}
 
 		return this;
 	};
@@ -432,17 +431,27 @@ ParticleJS.Emitter2D.Point = function(options) {
 	this.scale = null;
 
 	this.reverseZ = function(state) {
-
 		if (!arguments.length) return reverseZ;
-
 		if (typeof state === 'boolean') reverseZ = state;
-
 		return this;
 	};
 
+	//todo untested
 	this.clear = function(brate) {
 		particles = [];
 		if (typeof brate === 'number') this.birthRate(brate);
+		return this;
+	};
+
+	this.preRender = function(state) {
+		if (!arguments.length) return preRender;
+		if (typeof state === 'boolean') preRender = state;
+		return this;
+	};
+
+	this.postRender = function(state) {
+		if (!arguments.length) return postRender;
+		if (typeof state === 'boolean') postRender = state;
 		return this;
 	};
 

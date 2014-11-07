@@ -158,14 +158,16 @@
 	</div> 	<!-- container -->
 
 <script src="../src/particle.core.js"></script>
+<script src="../src/particle.tools.getMapImage.js"></script>
+<script src="../src/particle.tools.mapobject.js"></script>
 <script src="../src/particle.scene.js"></script>
 <script src="../src/particle.emitter2D.point.js"></script>
 <script src="../src/particle.particle2D.js"></script>
 <script src="../src/particle.physics2D.gravity.js"></script>
+<script src="../src/particle.physics2D.windsimple.js"></script>
 <script src="../src/particle.physics2D.wind.js"></script>
-<script src="../src/particle.physics2D.turbulence.tools.js"></script>
-<script src="../src/particle.physics2D.turbulence.noise.js"></script>
-<script src="../src/particle.physics2D.turbulence.vortex.js"></script>
+<script src="../src/particle.physics2D.turbulence.js"></script>
+<script src="../src/particle.physics2D.vortex.js"></script>
 <script src="../src/particle.shader2D.canvas.js"></script>
 <script src="../src/particle.gradient.js"></script>
 
@@ -180,10 +182,9 @@
 	    gravity,
 	    wind,
 	    magnet,
-	    turb,
+	    turbulence,
 	    vortex1,
 	    vortex2,
-	    globalForce,
 
 		canvas = document.getElementById('canvas'),
 		tmap = null,
@@ -226,7 +227,7 @@
 		birthRate     : brate,      // particles per frame
 		velocity      : 300,        // speed each particle is thrown at its direction
 		randomVelocity: 0.6,        // random variation of full velocity
-		life          : 3,          // life in seconds
+		life          : 2.8,        // life in seconds
 		spread        : 360,        // angle of spread
 		spreadAngle   : 0,          // if spread is not 360, angle offset to spread from
 		x             : 400,        // emitter center
@@ -236,44 +237,51 @@
 		feather       : 0.5,        // feather (normalized)
 		randomFeather : 0,
 		gradient      : gradient,   // optional gradient (overrides color below)
+		randomColor   : false,
 		r             : 150,        // base color
 		g             : 190,
 		b             : 250,
 		opacity       : 0.16,       // global opacity, overridden by variation and ramp (opacity over life)
 		randomOpacity : 0,
-		shader        : shader,   // use this shader (mandatory)
-		preRender     : true,        // call pre-render (clears canvas)
-		postRender    : true
+		shader        : shader,     // use this shader (mandatory)
+		preRender     : true,       // call pre-render (clears canvas)
+		postRender    : true,
+		maxParticles  : 1000        // max number rendered at any time (def. 32000).
 	});
 
 	// add emitter to scene
 	scene.addEmitter(emitter);
 
-	emitter.globalForce(0.5);
-
 	// create the physics models we want to use
 	gravity     = new ParticleJS.Physics2D.Gravity(0, 0);
-	wind        = new ParticleJS.Physics2D.Wind(0, 0);
-	magnet      = new ParticleJS.Physics2D.Turbulence.Vortex(400, 300, 100, 32, 32, 0).suction(1); // set max suction and it becomes a magnet
-	turb        = new ParticleJS.Physics2D.Turbulence.Noise(32, 24, 0);
-	vortex1     = new ParticleJS.Physics2D.Turbulence.Vortex(300, 200, 200, 32, 32, 0);
-	vortex2     = new ParticleJS.Physics2D.Turbulence.Vortex(600, 320, 120, 32, 32, 0);
+	wind        = new ParticleJS.Physics2D.WindSimple(0, 0);
+	vortex1     = new ParticleJS.Physics2D.Vortex(300, 200, 200, 32, 32, 0);
+	vortex2     = new ParticleJS.Physics2D.Vortex(600, 320, 120, 32, 32, 0);
+	magnet      = new ParticleJS.Physics2D.Vortex(400, 300, 100, 32, 32, 0).suction(1); // set max suction and it becomes a magnet
+	turbulence  = new ParticleJS.Physics2D.Turbulence(32, 24, 0);
 
 	// add the physics models in the order we want
-	emitter.addPhysics(turb);
+	emitter.addPhysics(turbulence);
 	emitter.addPhysics(vortex1);
 	emitter.addPhysics(vortex2);
 	emitter.addPhysics(magnet);
 	emitter.addPhysics(gravity);
 	emitter.addPhysics(wind);
 
-	//document.body.appendChild(vortex1.getMapImage());
-	//document.body.appendChild(vortex2.getMapImage());
-
 	// optional over-life arrays
 	emitter.sizeOverLife = new Float32Array([0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.7, 0.5]);
 	emitter.opacityOverLife = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.01]);
 	emitter.featherOverLife = new Float32Array([1]); //new Float32Array([0, 0.25, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+
+	//clip canvas (reduces performance)
+	/*shader.setClip([
+		{x: 50, y: 100},
+		{x: 100, y: 20},
+		{x: 200, y: 40},
+		{x: 400, y: 30},
+		{x: 700, y: 300},
+		{x: 400, y: 600}
+	]);*/
 
 	function getXY(e) {
 		var r = canvas.getBoundingClientRect();
@@ -376,7 +384,7 @@
 
 	addEv('rngTurb', 'change', function() {
 		var v = this.value * 0.01;
-		turb.force(+v);
+		turbulence.force(+v);
 		document.getElementById('outTurb').innerHTML = v.toFixed(2);
 	});
 
@@ -394,7 +402,7 @@
 
 	addEv('rngGlobal', 'change', function() {
 		var v = this.value * 0.01;
-		emitter.globalForce(+v);
+		emitter.globalForce(v);
 		document.getElementById('outGlobal').innerHTML = v.toFixed(2);
 	});
 
@@ -407,12 +415,8 @@
 	});
 
 	addEv('chkMap', 'change', function() {
-		if (this.checked) {
-			canvas.style.background = 'url(' + turb.getMapImage().toDataURL() + ')';
-		}
-		else {
-			canvas.style.background = '#000';
-		}
+		showTurbMap = !!this.checked;
+		emitter.preRender(!showTurbMap);
 	});
 
 	// allow "shooting" (mouse down = birth rate, up = none)
@@ -429,10 +433,7 @@
 	});
 
 	addEv('btnNewTurb', 'click', function() {
-		turb.generate();
-		if (chkMap.checked) {
-			canvas.style.background = 'url(' + turb.getMapImage().toDataURL() + ')';
-		}
+		turbulence.generate();
 	});
 
 	// for shooting
@@ -451,6 +452,9 @@
 		isDown = false;
 	}, false);
 
+	var ctx = canvas.getContext('2d'),
+		showTurbMap = false;
+
 	// main loop
 	(function loop() {
 
@@ -460,6 +464,10 @@
 			requestAnimationFrame(loop);
 			return;
 		}*/
+
+		if (showTurbMap) {
+				ctx.drawImage(turbulence.getMapImage(), 0, 0);
+		}
 
 		scene.render();
 

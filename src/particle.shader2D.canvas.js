@@ -8,6 +8,8 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 	var ctx,
 		w,
 		h,
+		rndColor =false,
+		clipArr = null,
 		spriteSize = 50,
 		spriteHalfSize = spriteSize * 0.5,
 		clearOpacity = options.clearOpacity || 1,
@@ -36,6 +38,7 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 		sprite.height = hasGradient ? spriteSize * ccnt : spriteSize;
 
 		if (!hasGradient) ccnt = 0;
+		else rndColor = e.rndColor;
 
 		spriteHalf.width = sprite.width >> 1;
 		spriteHalf.height = sprite.height >> 1;
@@ -94,7 +97,7 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 
 		var fi = (scnt1 * p.feather)|0,		// feather index
 			sx = fi * spriteSize,
-			ci = (ccnt1 * p.lifeIndex)|0,	// color index
+			ci = rndColor ? (ccnt1 * Math.random())|0 : (ccnt1 * p.lifeIndex)|0,	// color index
 			sy = ci * spriteSize;
 
 		ctx.globalAlpha = p.opacity;
@@ -111,6 +114,7 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 	};
 
 	this.postRender = function(e) {
+		//todo temp impl. for debugging
 		var fs = ctx.fillStyle;
 		ctx.fillStyle = '#fff';
 		ctx.globalAlpha = 1;
@@ -125,4 +129,21 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 		ctx.fillStyle = 'rgba(0,0,0,' + clearOpacity + ')';
 		return this;
 	};
+
+	this.setClip = function(cArr) {
+
+		ctx.restore();
+		ctx.save();
+
+		if (!Array.isArray(cArr)) throw 'Need a polygon array';
+		clipArr = cArr;
+
+		ctx.beginPath();
+		ctx.moveTo(cArr[0].x, cArr[0].y);
+		for(var i = 0, p; p = cArr[i]; i++)
+			ctx.lineTo(p.x, p.y);
+
+		ctx.clip();
+	};
+
 };
