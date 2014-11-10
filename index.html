@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Particlejs : Real-time particle engine for JavaScript">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Particlejs</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/epistemex/particleJS">View on GitHub</a>
+
+          <h1 id="project_title">Particlejs</h1>
+          <h2 id="project_tagline">Real-time particle engine for JavaScript</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/epistemex/particleJS/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/epistemex/particleJS/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="particlejs" class="anchor" href="#particlejs" aria-hidden="true"><span class="octicon octicon-link"></span></a>ParticleJS</h1>
+
+<p><strong>ParticleJS is a real-time particle engine for JavaScript</strong> and typically canvas,
+although not limited to.</p>
+
+<p>With this particle engine you can make real-time effects such as smoke, flames, dust, clouds
+and explosions. You can also create fluids and ambient effects. As it uses
+a plugin model for rendering and physics you can render a particle in unlimited ways.</p>
+
+<p>The engine is for real-time use, but still very early work in progress.</p>
+
+<p><strong>This ALPHA version has implemented:</strong></p>
+
+<ul>
+<li>Plugin based render engine (incl. for 2D canvas)</li>
+<li>Plugin based physics engine (wind, gravity, turbulence, vortex etc.)</li>
+<li>Render plugins can be defined to support various particle shapes and render surfaces</li>
+<li>Opacity, and opacity over-life for each individual particle</li>
+<li>Feather, and feather over-life for each individual particle</li>
+<li>Size, and size over-life for each individual particle</li>
+<li>Solid color, or color gradient for over-life change for each individual particle</li>
+<li>Flexible over-life arrays can be of any length and engine will adopt</li>
+<li>Particles per second birth rate</li>
+<li>Velocity rate</li>
+<li>Spread angle (z axis only for now which means it only spreads along x and y)</li>
+<li>Spread angle offset</li>
+<li>Random variations and amount of it for velocity, size, feather and opacity at birth</li>
+<li>Time or frame bound (latter intended for rendering frames). Will adopt to current frame rate providing
+as smooth as possible animation.</li>
+<li>Render engine supports pre-, post- and update render calls per emitter for renderer (this allow you to share drawing surface).</li>
+<li>Automatic clean-up of dead particles and particle arrays</li>
+<li>Z-order toggle (newest or oldest first)</li>
+<li>Global force parameter</li>
+<li>Animated turbulence</li>
+</ul>
+
+<p><strong>In progress / evaluated:</strong></p>
+
+<ul>
+<li>Centralized sprite caching for 2D bitmap surfaces</li>
+<li>Z-axis support (2.5D)</li>
+<li>Additional velocity parameters</li>
+<li>Improve air resistance of physics wind engine</li>
+<li>A High-Quality mode if user wants to render frames in a no real-time scenario</li>
+</ul>
+
+<p><strong>MAYBE... and most likely only for a web-gl renderer:</strong></p>
+
+<ul>
+<li>Scene with 3D light and camera support</li>
+<li>3D Particles (in addition to the 2.5D above)</li>
+<li>Shaders to render particles with light and shadow</li>
+<li>Visual editor to create curves for "over-life" features, and:</li>
+<li>Visual editor to setup an emitter and particles, and to generate code for it</li>
+</ul>
+
+<p><img src="http://i.imgur.com/P3BMlXq.png" alt="Snow demo"><br>
+<sup>Realistic snow can be simulated (see demo)</sup></p>
+
+<p><img src="http://i.imgur.com/UvcffGW.png" alt="Fireworks demo"><br>
+<sup>Fireworks demo. Wind resistance not yet supported but still good results (see demo)</sup></p>
+
+<p><img src="http://i.imgur.com/8wEs64h.png" alt="Audio vizualizer"><br>
+<sup>A simple audio visualizer using FFT analysis to drive the single particle line emitter</sup></p>
+
+<p><img src="http://i.imgur.com/H4DvC13.png" alt="snapshot 1"><br>
+<sup>200 particles/s @ 2.8s life, gradient, turbulence, 2x vortexes, magnet (also vortex based ) opacity and size over life @ 60 FPS</sup></p>
+
+<p><img src="http://i.imgur.com/RosB7NO.png" alt="snapshot 2"><br>
+<sup>Visual representation of the turbulence grid from the turbulence noise physics plugin</sup></p>
+
+<p><img src="http://i.imgur.com/sbAbNwR.png" alt="snapshot 3"><br>
+<sup>Single vortex map representation with gradient radial force mapping and suction. Several can be combined.</sup></p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>More details will be published when it goes to beta. Nothing is 100%
+settled yet as some tweaks and changes may have to be made to keep it
+able to run real-time.</p>
+
+<p>Please see included demo and play around with the parameters in the source.</p>
+
+<h2>
+<a id="issues" class="anchor" href="#issues" aria-hidden="true"><span class="octicon octicon-link"></span></a>Issues</h2>
+
+<p>There are known issues. As the engine is in alpha there is no need at this point to
+report issues as things change fast and we may add/remove features and so forth for
+the next version.</p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>Dual license:</p>
+
+<ul>
+<li>Free license for personal and non-commercial use. Header required.</li>
+<li>For commercial use (any monetizing activity) you can purchase a commercial license (details TBA).</li>
+</ul>
+
+<h2>
+<a id="where-to-find-us" class="anchor" href="#where-to-find-us" aria-hidden="true"><span class="octicon octicon-link"></span></a>Where to find us</h2>
+
+<p>→ Follow on <a href="https://twitter.com/epistemex/">Twitter</a></p>
+
+<p><em>© 2014 Epistmex</em></p>
+
+<p><img src="http://i.imgur.com/YxO8CtB.png" alt="Epistemex"></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Particlejs maintained by <a href="https://github.com/epistemex">epistemex</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
