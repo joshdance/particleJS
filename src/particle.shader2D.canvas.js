@@ -15,6 +15,7 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 
 		clearOpacity = options.clearOpacity || 1,
 		keepAlpha = options.keepAlpha || false,
+		bgImage = options.image || null,
 
 		scnt = 30,
 		sstep = 1 / scnt,
@@ -95,12 +96,19 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 	this.preRender = function() {
 
 		if (clearOpacity === 1) {
-			ctx.clearRect(0, 0, w, h)
+			if (bgImage) {
+				ctx.drawImage(bgImage, 0, 0, w, h);
+			}
+			else
+				ctx.clearRect(0, 0, w, h)
 		}
 		else {
 			ctx.globalAlpha = clearOpacity;
 
-			if (keepAlpha) {
+			if (bgImage) {
+				ctx.drawImage(bgImage, 0, 0, w, h);
+			}
+			else if (keepAlpha) {
 				ctx.globalCompositeOperation = 'source-atop';
 				ctx.fillRect(0, 0, w, h);
 				ctx.globalCompositeOperation = 'source-over';

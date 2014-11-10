@@ -5,6 +5,7 @@ html, body {
 	}
 body {
 	background:#003;
+	background-size: cover;
 	}
 #canvas {
 	position: absolute;

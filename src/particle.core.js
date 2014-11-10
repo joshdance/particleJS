@@ -1,6 +1,7 @@
 /*!
- *	ParticleJS version 0.1.6 ALPHA
- *	MIT license - include header
+ *	ParticleJS version 0.1.7 ALPHA
+ *	Dual license - see site for details (TBA)
+ *  http://epistemex.github.io/particleJS
  *
  *	By Epistemex (c) 2014
  *	www.epistemex.com

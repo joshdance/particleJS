@@ -35,7 +35,7 @@ var	canvas = document.getElementById('canvas'),
 	angleStep = 2*Math.PI/16,
 	globalAngle = 0,
 	iRad = 80,
-	oRad = 260,
+	oRad = cy*0.9,
 
 	scene,
 	emitter,
@@ -100,7 +100,7 @@ function setup() {
 		spreadAngle   : 180,
 		spreadOffset  : 80,
 		size          : 50,
-		randomSize    : 0.8,
+		randomSize    : 0.9,
 		feather       : 0.5,
 		randomFeather : 0.3,
 		gradient	  : gradient,
@@ -137,7 +137,7 @@ function setup() {
 	audioEl.play();
 
 	analyser = actx.createAnalyser();
-	analyser.smoothingTimeConstant = 0.5;
+	analyser.smoothingTimeConstant = 0.7;
 	analyser.fftSize = 128;
 
 	srcNode = actx.createMediaElementSource(audioEl);
@@ -149,7 +149,7 @@ function setup() {
 	fftS = new Uint8Array(analyser.frequencyBinCount);
 
 	ctx.strokeStyle = '#fff';
-	ctx.lineWidth = 8;
+	ctx.lineWidth = 12;
 	ctx.lineCap = 'round';
 
 	if (!isPlaying) draw();
@@ -178,6 +178,8 @@ function draw() {
 
 	f = sz / (16*255);
 
+	turb.force(0.02 + 0.08 * f);
+
 	for(i = 2; v = fft[i]; i += 4) {
 
 		if (v > fftS[i]) fftS[i] = v;
@@ -204,7 +206,7 @@ function draw() {
 
 	scene.renderNoGeneration();
 
-	ctx.globalAlpha = 0.8;
+	ctx.globalAlpha = f;
 	ctx.stroke();
 
 	ctx.fillStyle = '#003';

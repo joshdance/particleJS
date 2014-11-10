@@ -1,6 +1,11 @@
 Change log for ParticleJS
 -------------------------
 
+0.1.7 ALPHA
+
+ADD: Option to use image to clear background when enabling pre-render for shader (option: image).
+
+
 0.1.6 ALPHA
 
 ADD: DEMO: snow
