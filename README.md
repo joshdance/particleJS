@@ -49,6 +49,10 @@ as smooth as possible animation.
 - Visual editor to create curves for "over-life" features, and:
 - Visual editor to setup an emitter and particles, and to generate code for it
 
+![Snow demo](http://i.imgur.com/akxxoYr.png)
+
+![Fireworks demo](http://i.imgur.com/4S4t9RQ.png)
+
 ![snapshot 1](http://i.imgur.com/H4DvC13.png)<br>
 <sup>200 particles/s @ 2.8s life, gradient, turbulence, 2x vortexes, magnet (also vortex based ) opacity and size over life @ 60 FPS</sup>
 
@@ -78,7 +82,10 @@ the next version.
 License
 -------
 
-Released under [MIT license](http://choosealicense.com/licenses/mit/). You can use this class in both commercial and non-commercial projects provided that full header (minified and developer versions) is included.
+Dual license:
+
+- Free license for personal and non-commercial use. Header required.
+- For commercial use (any monetizing activity) you can purchase a commercial license (details TBA).
 
 
 Where to find us

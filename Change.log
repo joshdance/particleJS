@@ -3,13 +3,23 @@ Change log for ParticleJS
 
 0.1.6 ALPHA
 
+ADD: DEMO: snow
+ADD: DEMO: fireworks
+ADD: DEMO: Audio visualizer (newer Chrome or Firefox) (the music track used here is freely distributable btw)
+ADD: "blur" clear now supports transparency (shader option with clearOpacity: keepAlpha (bool)).
+ADD: added method to scene to render without generating particles. This allow manual generation directly from the emitter (see audio demo).
+ADD: three new emitter types: line, box, grid in addition to point
 ADD: common map object for physics engine
 ADD: starting (slowly) jsdoc implementation
 ADD: random color support (over life with gradient)
+ADD: max particles option for emitter
+CHG: LICENSE CHANGE
+CHG: emitter option spreadAngle->spreadOffset, spread->spreadAngle
+CHG: Changed particles internal array from 2D to 1D
 CHG: Vortex plugin uses new map object
-CHG: simplified namespace (turbulence.noise->turbulence, turbulence.vortex->vortex).
+CHG: simplified namespace (turbulence.noise->turbulence, turbulence.vortex->vortex, Emitter2D.Point->Emitter2D).
 CHG: moving air-resistance from wind -> gravity
-
+FIX: gradient in shader referenced parent context by accident instead of local ref.
 
 0.1.5 ALPHA
 

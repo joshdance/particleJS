@@ -161,7 +161,7 @@
 <script src="../src/particle.tools.getMapImage.js"></script>
 <script src="../src/particle.tools.mapobject.js"></script>
 <script src="../src/particle.scene.js"></script>
-<script src="../src/particle.emitter2D.point.js"></script>
+<script src="../src/particle.emitter2D.js"></script>
 <script src="../src/particle.particle2D.js"></script>
 <script src="../src/particle.physics2D.gravity.js"></script>
 <script src="../src/particle.physics2D.windsimple.js"></script>
@@ -223,14 +223,14 @@
 	});
 
 	// create an emitter for scene using above renderer
-	emitter = new ParticleJS.Emitter2D.Point({
+	emitter = new ParticleJS.Emitter2D({
 		birthRate     : brate,      // particles per frame
 		velocity      : 300,        // speed each particle is thrown at its direction
 		randomVelocity: 0.6,        // random variation of full velocity
 		life          : 2.8,        // life in seconds
-		spread        : 360,        // angle of spread
-		spreadAngle   : 0,          // if spread is not 360, angle offset to spread from
-		x             : 400,        // emitter center
+		spreadAngle   : 360,        // angle of spread
+		spreadOffset  : 0,          // if spread is not 360, angle offset to spread from
+		x             : 400,        // emitter center (start point for line, center for box, upper-left corner for grid)
 		y             : 200,
 		size          : 100,        // global (max) diameter in pixels of each particle
 		randomSize    : 0.6,        // size variations
@@ -246,7 +246,16 @@
 		shader        : shader,     // use this shader (mandatory)
 		preRender     : true,       // call pre-render (clears canvas)
 		postRender    : true,
-		maxParticles  : 1000        // max number rendered at any time (def. 32000).
+		//maxParticles  : 1000        // max number rendered at any time (def. 32000).
+
+		type          : 'grid',
+		endX          : 700,        // end point if type = line
+		endY          : 400,
+		boxRadius     : 350,        // box radius if type = box
+		gridWidth     : 400,        // size of grid if type = grid
+		gridHeight    : 300,
+		cellsX        : 4,         // number of cells if type = grid,
+		cellsY        : 4
 	});
 
 	// add emitter to scene
@@ -273,7 +282,7 @@
 	emitter.opacityOverLife = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.01]);
 	emitter.featherOverLife = new Float32Array([1]); //new Float32Array([0, 0.25, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
 
-	//clip canvas (reduces performance)
+	//clip canvas (note: reduces performance)
 	/*shader.setClip([
 		{x: 50, y: 100},
 		{x: 100, y: 20},

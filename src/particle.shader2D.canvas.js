@@ -12,7 +12,10 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 		clipArr = null,
 		spriteSize = 50,
 		spriteHalfSize = spriteSize * 0.5,
+
 		clearOpacity = options.clearOpacity || 1,
+		keepAlpha = options.keepAlpha || false,
+
 		scnt = 30,
 		sstep = 1 / scnt,
 		ccnt = 32,
@@ -70,7 +73,7 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 			cs.globalCompositeOperation = 'source-atop';
 
 			for(i = 0; i < ccnt; i++) {
-				var c = gradient.getColor(i / ccnt);
+				var c = e.gradient.getColor(i / ccnt);
 				cs.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
 				cs.fillRect(0, i * spriteSize, sprite.width, spriteSize);
 			}
@@ -90,7 +93,22 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 	};
 
 	this.preRender = function() {
-		clearOpacity === 1 ? ctx.clearRect(0, 0, w, h) : ctx.fillRect(0, 0, w, h);
+
+		if (clearOpacity === 1) {
+			ctx.clearRect(0, 0, w, h)
+		}
+		else {
+			ctx.globalAlpha = clearOpacity;
+
+			if (keepAlpha) {
+				ctx.globalCompositeOperation = 'source-atop';
+				ctx.fillRect(0, 0, w, h);
+				ctx.globalCompositeOperation = 'source-over';
+			}
+			else {
+				ctx.fillRect(0, 0, w, h);
+			}
+		}
 	};
 
 	this.renderParticle = function(p) {
@@ -124,10 +142,26 @@ ParticleJS.Shader2D.Canvas = function(canvas, options) {
 
 	// methods for this renderer
 
+	this.clear = function() {
+		if (w) ctx.clearRect(0, 0, w, h);
+		return this;
+	};
+
 	this.clearOpacity = function(o) {
+		if (!arguments.length) return clearOpacity;
 		clearOpacity = o;
 		ctx.fillStyle = 'rgba(0,0,0,' + clearOpacity + ')';
 		return this;
+	};
+
+	this.keepAlpha = function(kAlpha) {
+		if (typeof kAlpha === 'boolean') {
+			keepAlpha = kAlpha;
+			return this;
+		}
+		else {
+			return keepAlpha;
+		}
 	};
 
 	this.setClip = function(cArr) {

@@ -44,6 +44,7 @@ ParticleJS.Scene = function(options) {
 		});
 
 		this.emitters.push(emitter);
+
 		return this;
 	};
 
@@ -70,6 +71,22 @@ ParticleJS.Scene = function(options) {
 		for(var i = 0, e; e = this.emitters[i++];) {
 			var num = ((e.birthRate() * ts) / diff + 0.5)|0;
 			e.generateParticles(time, num);
+			e.renderParticles(time, ts);
+			e.cleanupParticles(time);
+		}
+
+		return this;
+	};
+
+	this.renderNoGeneration = function() {
+
+		var time = performance.now(),
+			diff = time - lastTime,
+			ts = frameBound ? 60 / FPS : diff / 16.6667;
+
+		lastTime = time;
+
+		for(var i = 0, e; e = this.emitters[i++];) {
 			e.renderParticles(time, ts);
 			e.cleanupParticles(time);
 		}

@@ -17,7 +17,6 @@ ParticleJS.Physics2D.Turbulence = function(cellsX, cellsY, force) {
 		slices = 20,				// z-depth for animated variations
 		slice = 0,
 		sliceFrames = 5,
-		sliceFrameDlt = 1,
 		sliceCurrentFrame = 0,
 
 		jitter,						// jitter array
@@ -165,34 +164,34 @@ ParticleJS.Physics2D.Turbulence = function(cellsX, cellsY, force) {
 
 		var total = (jitterCount + 1) * jitterInt - 1,
 			cnt = jitterCount * jitterInt,
-			from = -1,
-			to = 0,
+			jFrom = -1,
+			jTo = 0,
 			i = 0;
 
 		jitter = new Uint8Array(total);
 
 		for(; i < cnt; i++) {
 			if (i % jitterInt === 0) {
-				if (from < 0) {
-					from = (Math.random() * slices)|0;
-					to = (Math.random() * slices)|0;
+				if (jFrom < 0) {
+					jFrom = (Math.random() * slices)|0;
+					jTo = (Math.random() * slices)|0;
 				}
 				else {
-					from = to;
-					to = (Math.random() * slices)|0;
+					jFrom = jTo;
+					jTo = (Math.random() * slices)|0;
 				}
 			}
-			jitter[i] = int(from, to, (i % jitterInt) / jitterInt);
+			jitter[i] = ip(jFrom, jTo, (i % jitterInt) / jitterInt);
 		}
 
 		// make last part loop-able
-		from = to;
-		to = jitter[0];
+		jFrom = jTo;
+		jTo = jitter[0];
 
 		for(; i < total; i++)
-			jitter[i] = int(from, to, (i % jitterInt) / jitterInt);
+			jitter[i] = ip(jFrom, jTo, (i % jitterInt) / jitterInt);
 
-		function int(a, b, t) {
+		function ip(a, b, t) {
 			return a + (b - a) * t;
 		}
 	}

@@ -31,6 +31,9 @@ ParticleJS.Particle2D = function() {
 	this.life			= 0;			// in milliseconds
 	this.lifeIndex		= 0;			// for size/opacity over time, 0-1
 
+	this.width			= 0;			// for 0-life use (if outside bounds) todo consider a new part. obj
+	this.height			= 0;
+
 	this.isActive		= true;
 };
 

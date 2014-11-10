@@ -9,14 +9,7 @@ ParticleJS.Physics2D.Gravity = function(gx, gy) {
 
 	this.airRest = 0;
 
-	var //isInited = false,
-		w, h;
-
 	this.init = function(e) {
-		w = e.width;
-		h = e.height;
-		//isInited = true;
-
 		if (e.callback) e.callback(true);
 	};
 
