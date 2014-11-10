@@ -10,6 +10,9 @@ a plugin model for rendering and physics you can render a particle in unlimited 
 
 The engine is for real-time use, but still very early work in progress.
 
+[Live demos can be found here](http://epistemex.github.io/particleJS/)
+---
+
 **This ALPHA version has implemented:**
 
 - Plugin based render engine (incl. for 2D canvas)
