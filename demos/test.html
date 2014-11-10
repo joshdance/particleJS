@@ -439,8 +439,7 @@
 		var p = getXY(e);
 		mx = p.x;
 		my = p.y;
-		emitter.x = mx;
-		emitter.y = my;
+		emitter.position(mx, my);
 		emitter.birthRate(brate);
 	}, false);
 
@@ -468,8 +467,7 @@
 
 		scene.render();
 
-		emitter.x = mx;
-		emitter.y = my;
+		emitter.position(mx, my);
 
 		//canvas.style.background = 'url(' + turb.getMapImage().toDataURL() + ')';
 
