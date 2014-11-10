@@ -49,9 +49,14 @@ as smooth as possible animation.
 - Visual editor to create curves for "over-life" features, and:
 - Visual editor to setup an emitter and particles, and to generate code for it
 
-![Snow demo](http://i.imgur.com/akxxoYr.png)
+![Snow demo](http://i.imgur.com/P3BMlXq.png)
+<sup>Realistic snow can be simulated (see demo)</sup>
 
-![Fireworks demo](http://i.imgur.com/4S4t9RQ.png)
+![Fireworks demo](http://i.imgur.com/UvcffGW.png)
+<sup>Fireworks demo. Wind resistance not yet supported but still good results (see demo)</sup>
+
+![Audio vizualizer](http://i.imgur.com/8wEs64h.png)
+<sup>A simple audio visualizer using FFT analysis to drive the single particle line emitter</sup>
 
 ![snapshot 1](http://i.imgur.com/H4DvC13.png)<br>
 <sup>200 particles/s @ 2.8s life, gradient, turbulence, 2x vortexes, magnet (also vortex based ) opacity and size over life @ 60 FPS</sup>
