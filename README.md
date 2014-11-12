@@ -53,7 +53,7 @@ as smooth as possible animation.
 - Visual editor to setup an emitter and particles, and to generate code for it
 
 ![Snow demo](http://i.imgur.com/P3BMlXq.png)<br>
-<sup>Realistic snow can be simulated (see demo)</sup>
+<sup>Realistic snow can be simulated [(see demo)](http://epistemex.github.io/particleJS/)</sup>
 
 ![Fireworks demo](http://i.imgur.com/UvcffGW.png)<br>
 <sup>Fireworks demo. Wind resistance not yet supported but still good results (see demo)</sup>
